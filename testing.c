@@ -7,7 +7,7 @@ typedef struct trieNode{
 }trieNode;
 
 
-/* Creating the root of the Trie data structure */
+/* Creading the root of the Trie data structure */
 int createRoot(trieNode *root){
 	
 	/* Create the root of the Trie */
@@ -30,25 +30,28 @@ int createRoot(trieNode *root){
 		root->children[i] = NULL;
 }
 
+/* Compares the ASCII value between two characters.
+   Helps with finding the right position in the Trie.
+
+   Possible return values: -1, 0, 1 */
+int compareKeys(char* a, char* b){
+	
+	
+
+}
 
 int insertTrie(trieNode* node, char* word){
+	
 	trieNode* temp;
 	temp = node;
 
-	/* We need to place each one of the letters 
-	   in different nodes. Some of the letters
-	   might already be in the Trie. In that case,
-	   we will simply not insert them again */
 	for(int i=0; i<strlen(word); i++){
-		/* Traverse the array which holds the pointers
-		   for the children */
 		for(int j=0; j<(temp->arraySize); j++){
-			if(temp->children[j] == NULL){
-				temp->children[j] = (trieNode*)malloc(sizeof(trieNode));
-				if(temp->children[j] == NULL)
-					return -1;
-				temp->children[j]->letter = word[i];
-			}
+		
+			int comparison = compareKeys(word[i],(temp->children[j]));
+			if(comparison == -1){}
+			else if(comparison == 0){}
+			else if(comparison == 1){}
 		}
 	}
 }

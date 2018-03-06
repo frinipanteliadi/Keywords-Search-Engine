@@ -29,7 +29,8 @@ typedef struct trieNode{
 }trieNode;
 
 
-nt main(int argc, char *argv[]){
+
+int main(int argc, char *argv[]){
 
 	/*********************/
 	/*** OPEN THE FILE ***/
