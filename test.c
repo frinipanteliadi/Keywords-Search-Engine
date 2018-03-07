@@ -32,7 +32,7 @@ typedef struct trieNode{
 	int childNodes;					/*Indicates the number of children the node has*/
 }trieNode;
 
-/* Initializing all members of the root */
+/* Initializes all of the root's members */
 void initializeRoot(trieNode **root){
 
 	(**root).letter = 0;
@@ -42,6 +42,30 @@ void initializeRoot(trieNode **root){
 	(**root).childNodes = 0;
 	(**root).children = NULL;
 }
+
+int getNumberOfLines(FILE* fp, char* lineptr){
+	size_t n = 0;
+	int lines = 0;
+	while(getline(&lineptr,&n,fp)!=-1){
+		lines++;
+	}
+	return lines;
+}
+
+void initializeMap(FILE* fp, char* line, char* delimiter,map* array){
+	size_t n = 0;
+	int i = 0;
+	while(getline(&line,&n,fp)!=-1){
+		char *id;
+		id = strtok(line," ");
+		array[i].id = atoi(id);
+		char *text = strtok(NULL,"\n");
+		array[i].text = (char*)malloc(strlen(text)+1);
+		strcpy(array[i].text,text);
+		i++;
+	}
+}
+
 
 int main(int argc, char *argv[]){
 
@@ -62,82 +86,67 @@ int main(int argc, char *argv[]){
 		return FILE_NOTOPEN;
 	}
 
-	/********************************/
-	/*** FIND THE TOTAL NUMBER OF ***/
-	/***    TEXTS IN THE FILE     ***/
-	/********************************/
-	char *lineptr;
-	lineptr = NULL;
-	size_t n = 0;
-	int lines = 0;
-	while(getline(&lineptr, &n,fp)!=-1){
-		char *id;
-		id = strtok(lineptr," ");
-		int id1 = atoi(id);
-		if(id1 != lines){
-			printf("The text were not given in the");
-			printf(" right order!\n");
-			return TEXTS_WRONG;
-		}
-		lines++;
-	}
-
-	fclose(fp);
+	/***********************************/
+	/*** FINDING THE TOTAL NUMBER OF ***/
+	/***      TEXTS IN THE FILE      ***/
+	/***********************************/
+	char* lineptr = NULL;
+	int lines = getNumberOfLines(fp,lineptr);
+	// printf("The file has %d texts in total\n",lines);
+	fseek(fp,lines,SEEK_SET);
 	free(lineptr);
 	
-	/****************************/
-	/***    SAVE THE TEXTS    ***/
-	/***  ALONG WITH THEIR ID ***/
-	/***************************/	
 
+	/**********************/	
+	/*** CREATING THE MAP ***/
+	/**********************/
+	
 	map *array;
 	array = (map*)malloc(lines*sizeof(map));
 	if(array == NULL){
 		printf("An error occured while trying to");
-		printf(" allocate memory\n");
+		printf(" allocate memory for the map\n");
 		return MEMORY_ALLOCATIONERROR;
 	}
 
-	fp = fopen(argv[2],"r");
-	if(fp == NULL){
-		printf("An error occured while trying to");
-		printf(" open the file\n");
-		return FILE_NOTOPEN;
-	}
+	char *line = NULL;
+	initializeMap(fp,line," ",array);
 
-	char *line;
-	line = NULL;
-	n = 0;
-	int i = 0;
-	while(getline(&line,&n,fp)!=-1){
-		char *id;
-		id = strtok(line," ");
-		array[i].id = atoi(id);
-		char *text = strtok(NULL,"\n");
-		array[i].text = (char*)malloc(strlen(text)+1);
-		strcpy(array[i].text,text);
-		i++;
-	}
-
+	/**********************/
+	/*** CLOSING THE FILE ***/
+	/**********************/
 	free(line);
 	fclose(fp);
 
+	/*for(int i = 0; i < lines; i++){
+		printf("ID: %d\n",array[i].id);
+		printf("TEXT: %s\n",array[i].text);
+		printf("\n");
+	}*/
 
 	/*********************************/
 	/*** CREATING AND INITIALIZING ***/
 	/***   THE ROOT OF THE TRIE    ***/
 	/*********************************/
+	
 	trieNode* root;
 	root = (trieNode*)malloc(sizeof(trieNode*));
 	if(root == NULL)
 		return MEMORY_ALLOCATIONERROR;
 
 	initializeRoot(&root);
+	/*printf("ROOTS INFORMATION:\n");
+	printf(" *Letter: %d\n",root->letter);
+	printf(" *IsEndOfWord: %d\n",root->isEndOfWord);
+	printf(" *ArraySize: %d\n",root->arraySize);
+	printf(" *ChildNodes: %d\n",root->childNodes);
+	printf(" *Children: %s\n",root->children);*/
 	
 
 	/***************************/
 	/*** DEALLOCATING MEMORY ***/
 	/***************************/
+	
 	for(int i = 0; i<lines; i++)
 		free(array[i].text);
 	free(array);
