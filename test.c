@@ -8,6 +8,9 @@
 #define TEXTS_WRONG -3
 #define ERROR -4
 
+
+/* Command for terminal: ./test -i docfile -k K */
+
 /* False = 0, True = 1 */
 typedef enum bool {False, True} bool;
 
@@ -24,13 +27,29 @@ typedef struct trieNode{
 	char letter;					/*Letter stored inside the node*/
 	bool isEndOfWord;				/*Flag which indicated whether a word ends in the current node*/
 	struct trieNode **children;		/*An array of pointers, where each one will store the address of a child node*/
-	postingsList *listPtr;			/*Pointer to postings list of a leaf node*/
+	// postingsList *listPtr;		/*Pointer to postings list of a leaf node*/
 	int arraySize;					/*Size of the array of pointers (needed for use with realloc)*/
+	int childNodes;					/*Indicates the number of children the node has*/
 }trieNode;
 
+/* Initializing all members of the root */
+void initializeRoot(trieNode **root){
 
+	(**root).letter = 0;
+	(**root).isEndOfWord = False;
+	// (**root).listPtr = NULL;
+	(**root).arraySize = 0;
+	(**root).childNodes = 0;
+	(**root).children = NULL;
+}
 
 int main(int argc, char *argv[]){
+
+	if(argc != 5){
+		printf("Error! Not enough arguments");
+		printf(" were provided\n");
+		return -1;
+	}
 
 	/*********************/
 	/*** OPEN THE FILE ***/
@@ -54,7 +73,6 @@ int main(int argc, char *argv[]){
 	while(getline(&lineptr, &n,fp)!=-1){
 		char *id;
 		id = strtok(lineptr," ");
-		//printf("ID: %s\n",id);
 		int id1 = atoi(id);
 		if(id1 != lines){
 			printf("The text were not given in the");
@@ -98,22 +116,31 @@ int main(int argc, char *argv[]){
 		char *text = strtok(NULL,"\n");
 		array[i].text = (char*)malloc(strlen(text)+1);
 		strcpy(array[i].text,text);
-		//printf("TEXT: %s\n",text);
-		//printf("TEXT IN ARRAY: %s\n",array[i].text);
 		i++;
 	}
 
-	for(int i = 0; i < lines; i++){
-		printf("ID: %d\n",array[i].id);
-		printf("TEXT: %s\n",array[i].text);
-		printf("\n");
-	}
-
-	for(int i = 0; i<lines; i++)
-		free(array[i].text);
-
 	free(line);
 	fclose(fp);
+
+
+	/*********************************/
+	/*** CREATING AND INITIALIZING ***/
+	/***   THE ROOT OF THE TRIE    ***/
+	/*********************************/
+	trieNode* root;
+	root = (trieNode*)malloc(sizeof(trieNode*));
+	if(root == NULL)
+		return MEMORY_ALLOCATIONERROR;
+
+	initializeRoot(&root);
+	
+
+	/***************************/
+	/*** DEALLOCATING MEMORY ***/
+	/***************************/
+	for(int i = 0; i<lines; i++)
+		free(array[i].text);
 	free(array);
+	free(root);
 	return 0;
 }

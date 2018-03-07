@@ -8,20 +8,15 @@ typedef struct trieNode{
 }trieNode;
 
 
-/* Creating the root of the Trie data structure
-   and initializing its members */
-int createRoot(trieNode *root){
-	
-	root = (trieNode*)malloc(sizeof(trieNode));
-	if(root == NULL)
-		return -1;
+/* Initializing all members of the root */
+void initializeRoot(trieNode **root){
 
-	root->letter = 0;
-	root->isEndOfWord = False;
-	// root->listPtr = NULL;
-	root->arraySize = 0;
-	root->childNodes = 0;
-	root->children = NULL;
+	(**root).letter = 0;
+	(**root).isEndOfWord = False;
+	// (**root).listPtr = NULL;
+	(**root).arraySize = 0;
+	(**root).childNodes = 0;
+	(**root).children = NULL;
 }
 
 /* Returns the difference between the ASCII values
@@ -94,7 +89,7 @@ int insertTrie(trieNode* node, char* word){
 			int value = 1;
 			while((value!=0) && j<(temp->childNodes)){
 				value = compareKeys(word[i],(temp->children[j]->letter));
-				if(value < 0)
+				if(value/*value < 0 || value > 0*/)
 					j++;
 			}
 			/*for(j=0; j < (temp->childNodes); j++){
@@ -106,7 +101,7 @@ int insertTrie(trieNode* node, char* word){
 			}*/
 
 			/* The node already exists */
-			if(temp->children[j] == NULL){
+			if(temp->children[j] == NULL && temp->childNodes != temp->arraySize){
 				temp->childNodes++;	
 
 				temp->children[j] = (trieNode*)malloc(sizeof(trieNode));
