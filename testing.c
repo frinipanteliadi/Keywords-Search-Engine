@@ -81,6 +81,8 @@ int insertTrie(trieNode* node, char* word){
 		   one child */
 		else{
 			
+			/* PROBLEM: Not necessary if we're increasing an
+			   already stored word */
 			if(temp->childNodes == temp->arraySize){
 				temp->arraySize = (temp->arraySize)*2;
 				temp->children = (trieNode**)realloc((temp->arraySize)*sizeof(trieNode*));
@@ -97,14 +99,21 @@ int insertTrie(trieNode* node, char* word){
 
 				if(value > 0)
 					continue;
-				if(value == (int)word[i])
+				/*	
+					This case is probably not possible since while 
+					we're traversing the trie we're keeping in mind
+					the total number of child nodes
+
+					if(value == (int)word[i])	
+						break;
+				*/
+				if(value == 0)
 					break;
 				if(value < 0){
 					memmove(temp->children[j+1],temp->children[j],(size_t)(temp->childNodes - j));
 					temp->children[j] = NULL;
 					break;
 				}
-
 			} 
 
 			if(temp->children[j] == NULL){

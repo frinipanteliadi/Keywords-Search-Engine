@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "functions.h"
 
 #define OK 0
 #define FILE_NOTOPEN -1
@@ -9,63 +10,7 @@
 #define ERROR -4
 
 
-/* Command for terminal: ./test -i docfile -k K */
-
-/* False = 0, True = 1 */
-typedef enum bool {False, True} bool;
-
-typedef struct map{
-	int id;
-	char *text;
-}map;
-
-typedef struct postingsList{
-	int test;
-}postingsList;
-
-typedef struct trieNode{
-	char letter;					/*Letter stored inside the node*/
-	bool isEndOfWord;				/*Flag which indicated whether a word ends in the current node*/
-	struct trieNode **children;		/*An array of pointers, where each one will store the address of a child node*/
-	// postingsList *listPtr;		/*Pointer to postings list of a leaf node*/
-	int arraySize;					/*Size of the array of pointers (needed for use with realloc)*/
-	int childNodes;					/*Indicates the number of children the node has*/
-}trieNode;
-
-/* Initializes all of the root's members */
-void initializeRoot(trieNode **root){
-
-	(**root).letter = 0;
-	(**root).isEndOfWord = False;
-	// (**root).listPtr = NULL;
-	(**root).arraySize = 0;
-	(**root).childNodes = 0;
-	(**root).children = NULL;
-}
-
-int getNumberOfLines(FILE* fp, char* lineptr){
-	size_t n = 0;
-	int lines = 0;
-	while(getline(&lineptr,&n,fp)!=-1){
-		lines++;
-	}
-	return lines;
-}
-
-void initializeMap(FILE* fp, char* line, char* delimiter,map* array){
-	size_t n = 0;
-	int i = 0;
-	while(getline(&line,&n,fp)!=-1){
-		char *id;
-		id = strtok(line," ");
-		array[i].id = atoi(id);
-		char *text = strtok(NULL,"\n");
-		array[i].text = (char*)malloc(strlen(text)+1);
-		strcpy(array[i].text,text);
-		i++;
-	}
-}
-
+/* Command for terminal: ./minisearch -i docfile -k K */
 
 int main(int argc, char *argv[]){
 
@@ -118,11 +63,11 @@ int main(int argc, char *argv[]){
 	free(line);
 	fclose(fp);
 
-	/*for(int i = 0; i < lines; i++){
+	for(int i = 0; i < lines; i++){
 		printf("ID: %d\n",array[i].id);
 		printf("TEXT: %s\n",array[i].text);
 		printf("\n");
-	}*/
+	}
 
 	/*********************************/
 	/*** CREATING AND INITIALIZING ***/
@@ -135,12 +80,7 @@ int main(int argc, char *argv[]){
 		return MEMORY_ALLOCATIONERROR;
 
 	initializeRoot(&root);
-	/*printf("ROOTS INFORMATION:\n");
-	printf(" *Letter: %d\n",root->letter);
-	printf(" *IsEndOfWord: %d\n",root->isEndOfWord);
-	printf(" *ArraySize: %d\n",root->arraySize);
-	printf(" *ChildNodes: %d\n",root->childNodes);
-	printf(" *Children: %s\n",root->children);*/
+	// printRoot(&root);		*** FOR DEBUGGING ***
 	
 
 	/***************************/
