@@ -63,11 +63,8 @@ int main(int argc, char *argv[]){
 	free(line);
 	fclose(fp);
 
-	for(int i = 0; i < lines; i++){
-		printf("ID: %d\n",array[i].id);
-		printf("TEXT: %s\n",array[i].text);
-		printf("\n");
-	}
+	// *** FOR DEBUGGING ***
+	// printMap(lines,array); 
 
 	/*********************************/
 	/*** CREATING AND INITIALIZING ***/
@@ -80,7 +77,8 @@ int main(int argc, char *argv[]){
 		return MEMORY_ALLOCATIONERROR;
 
 	initializeRoot(&root);
-	// printRoot(&root);		*** FOR DEBUGGING ***
+	// *** FOR DEBUGGING ***
+	// printRoot(&root);		
 	
 
 	/***************************/

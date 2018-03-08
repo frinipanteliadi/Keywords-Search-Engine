@@ -23,3 +23,4 @@ void initializeRoot(trieNode **);
 void printRoot(trieNode **);
 int getNumberOfLines(FILE*, char* lineptr);
 void initializeMap(FILE*, char*, char*, map*);
+void printMap(int, map*);
