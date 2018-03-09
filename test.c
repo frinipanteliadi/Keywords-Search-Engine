@@ -38,7 +38,7 @@ int main(int argc, char *argv[]){
 	char* lineptr = NULL;
 	int lines = getNumberOfLines(fp,lineptr);
 	// printf("The file has %d texts in total\n",lines);
-	fseek(fp,lines,SEEK_SET);
+	rewind(fp);
 	free(lineptr);
 	
 
@@ -55,15 +55,16 @@ int main(int argc, char *argv[]){
 	}
 
 	char *line = NULL;
-	initializeMap(fp,line," ",array);
-
+	int code = initializeMap(fp,line," ",array);
+	if(code == -1)
+		return -1;
 	/**********************/
 	/*** CLOSING THE FILE ***/
 	/**********************/
 	free(line);
 	fclose(fp);
 
-	// *** FOR DEBUGGING ***
+	
 	// printMap(lines,array); 
 
 	/*********************************/
@@ -77,10 +78,11 @@ int main(int argc, char *argv[]){
 		return MEMORY_ALLOCATIONERROR;
 
 	initializeRoot(&root);
-	// *** FOR DEBUGGING ***
-	// printRoot(&root);		
+	// printNodes(root);		
 	
+	initializeTrie(lines," ",root,array);
 
+	// printNodes(root);
 	/***************************/
 	/*** DEALLOCATING MEMORY ***/
 	/***************************/
@@ -88,6 +90,6 @@ int main(int argc, char *argv[]){
 	for(int i = 0; i<lines; i++)
 		free(array[i].text);
 	free(array);
-	free(root);
+	destroyTrie(root);
 	return 0;
 }

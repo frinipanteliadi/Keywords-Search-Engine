@@ -19,8 +19,13 @@ typedef struct trieNode{
 	int childNodes;					/*Indicates the number of children the node has*/
 }trieNode;
 
-void initializeRoot(trieNode **);
-void printRoot(trieNode **);
-int getNumberOfLines(FILE*, char* lineptr);
-void initializeMap(FILE*, char*, char*, map*);
+int initializeMap(FILE*, char*, char*, map*);
 void printMap(int, map*);
+int compareKeys(char*, char*);
+void initializeRoot(trieNode **);
+void printNode(trieNode *);
+void printNodes(trieNode *);
+void destroyTrie(trieNode*);
+void insertTrie(trieNode*, char*);
+void initializeTrie(int, char *, trieNode*, map*);
+int getNumberOfLines(FILE*, char* lineptr);

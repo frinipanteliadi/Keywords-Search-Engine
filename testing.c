@@ -22,11 +22,11 @@ void initializeRoot(trieNode **root){
 /* Returns the difference between the ASCII values
    of a and b */
 int compareKeys(char* a, char* b){
-	return(((*a)-(*b)));
+	return((*a)-(*b));
 }	
 
 /* Inserts a new value (word) in the Trie */
-int insertTrie(trieNode* node, char* word){
+void insertTrie(trieNode* node, char* word){
 	trieNode* temp = node;
 
 	/* Each iteration is responsible for a single
@@ -41,7 +41,7 @@ int insertTrie(trieNode* node, char* word){
 
 			temp->children = (trieNode**)malloc((temp->arraySize)*sizeof(trieNode*));
 			if(temp->children == NULL)
-				return -1;
+				return;
 
 			for(int j=0; j<(temp->arraySize); j++){
 				if(j>0)
@@ -49,7 +49,7 @@ int insertTrie(trieNode* node, char* word){
 				else{
 					temp->children[0] = (trieNode*)malloc(sizeof(trieNode));
 					if(temp->children[0] == NULL)
-						return -1;
+						return;
 
 					temp->children[0]->letter = word[i];
 
@@ -85,9 +85,9 @@ int insertTrie(trieNode* node, char* word){
 			   already stored word */
 			if(temp->childNodes == temp->arraySize){
 				temp->arraySize = (temp->arraySize)*2;
-				temp->children = (trieNode**)realloc((temp->arraySize)*sizeof(trieNode*));
+				temp->children = (trieNode**)realloc(temp->children,(temp->arraySize)*sizeof(trieNode*));
 				if(temp->children == NULL)
-					return -1;
+					return;
 				for(int k = temp->childNodes; k < temp->arraySize; k++)
 					temp->children[k] = NULL;
 			}
@@ -95,22 +95,16 @@ int insertTrie(trieNode* node, char* word){
 			int value;
 			int j;
 			for(j = 0; j < temp->childNodes; j++){
-				value = compareKeys(word[i],temp->children[j]->letter);
+				value = compareKeys(&word[i],&(temp->children[j]->letter));
 
 				if(value > 0)
 					continue;
-				/*	
-					This case is probably not possible since while 
-					we're traversing the trie we're keeping in mind
-					the total number of child nodes
-
-					if(value == (int)word[i])	
-						break;
-				*/
 				if(value == 0)
 					break;
 				if(value < 0){
-					memmove(temp->children[j+1],temp->children[j],(size_t)(temp->childNodes - j));
+					// memmove(temp->children[j+1],temp->children[j],(size_t)((temp->childNodes-j)*sizeof(trieNode*)));
+					for(int k = temp->arraySize - 1; k > j; k--)
+						temp->children[k] = temp->children[k-1];
 					temp->children[j] = NULL;
 					break;
 				}
@@ -121,7 +115,7 @@ int insertTrie(trieNode* node, char* word){
 
 				temp->children[j] = (trieNode*)malloc(sizeof(trieNode));
 				if(temp->children[j] == NULL)
-					return -1;
+					return;
 
 				temp->children[j]->letter = word[i];
 
@@ -139,7 +133,7 @@ int insertTrie(trieNode* node, char* word){
 				/* The current node doesn't have any children.
 				   That's why we must initialize the following 
 				   values with zero */
-				temp->children[j]->arraySize = 0
+				temp->children[j]->arraySize = 0;
 				temp->children[j]->childNodes = 0;
 				temp->children[j]->children = NULL;
 			}
@@ -151,5 +145,39 @@ int insertTrie(trieNode* node, char* word){
 		}
 	}
 
-	return 0;
+	return;
+}
+
+/* Destroys the Trie and deallocates the memory
+   that we allocated while trying to create it */
+void destroyTrie(trieNode* node){
+	trieNode* temp = node;
+
+	if(temp == NULL)
+		return;
+
+	for(int i = 0; i < temp->childNodes; i++)
+		destroyTrie(temp->children[i]);
+
+	free(temp);
+}
+
+void printNode(trieNode *node){
+	trieNode* temp = node;
+	printf("------------------\n");
+	printf(" *Letter: %c\n",temp->letter);
+	printf(" *isEndOfWord: %d\n",temp->isEndOfWord);
+	printf(" *arraySize: %d\n",temp->arraySize);
+	printf(" *childNodes: %d\n",temp->childNodes);
+	printf(" *children: %x\n",temp->children);
+	printf("------------------\n");
+}
+
+void printNodes(trieNode *node){
+	trieNode* temp = node;
+
+	for(int i = 0; i < temp->childNodes; i++)
+		printNodes(temp->children[i]);
+
+	printNode(temp);
 }
