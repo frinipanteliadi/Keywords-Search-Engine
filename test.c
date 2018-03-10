@@ -73,7 +73,7 @@ int main(int argc, char *argv[]){
 	/*********************************/
 	
 	trieNode* root;
-	root = (trieNode*)malloc(sizeof(trieNode*));
+	root = (trieNode*)malloc(sizeof(trieNode));
 	if(root == NULL)
 		return MEMORY_ALLOCATIONERROR;
 
@@ -83,6 +83,8 @@ int main(int argc, char *argv[]){
 	initializeTrie(lines," ",root,array);
 
 	// printNodes(root);
+
+	
 	/***************************/
 	/*** DEALLOCATING MEMORY ***/
 	/***************************/
