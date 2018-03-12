@@ -20,9 +20,10 @@ typedef struct postingsList{
 typedef struct trieNode{
 	char letter;					/*Letter stored inside the node*/
 	bool isEndOfWord;				/*Flag which indicated whether a word ends in the current node*/
-	struct trieNode* children;		/*Points to a child node*/
-	struct trieNode* next;		/*Points to the next sibling node*/
-	// postingsList *listPtr;		/*Pointer to postings list of a leaf node*/
+	struct trieNode **children;		/*An array of pointers, where each one will store the address of a child node*/
+	postingsList *listPtr;		    /*Pointer to postings list of a leaf node*/
+	int arraySize;					/*Size of the array of pointers (needed for use with realloc)*/
+	int childNodes;					/*Indicates the number of children the node has*/
 }trieNode;
 
 int initializeMap(FILE*, char*, char*, map*);

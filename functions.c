@@ -28,11 +28,6 @@ int initializeMap(FILE* fp, char* line, char* delimiter,map* array){
 		i++;
 	}
 
-
-	/*char str[1000];
-	while(fgets(str,1000,fp)!=NULL)
-		printf("%s\n",str);*/
-
 	return 0;
 }
 
@@ -46,7 +41,7 @@ void printMap(int lines, map* ptr){
 }
 
 /***************************/
-/*** TRIE ROOT FUNCTIONS ***/
+/***    TRIE FUNCTIONS   ***/
 /***************************/
 /* Returns the difference between the ASCII values
    of a and b */
@@ -60,13 +55,12 @@ void initializeRoot(trieNode **root){
 	(**root).letter = 0;
 	(**root).isEndOfWord = False;
 	// (**root).listPtr = NULL;
-	(**root).arraySize = 0;
-	(**root).childNodes = 0;
 	(**root).children = NULL;
+	(**root).next = NULL;
 }
 
 /* Prints the values of a node's members */
-void printNode(trieNode *node){
+/*void printNode(trieNode *node){
 	trieNode* temp = node;
 	printf("------------------\n");
 	printf(" *Letter: %c\n",temp->letter);
@@ -75,22 +69,22 @@ void printNode(trieNode *node){
 	printf(" *childNodes: %d\n",temp->childNodes);
 	printf(" *children: %x\n",temp->children);
 	printf("------------------\n");
-}
+}*/
 
 /* Prints the data that each member of the 
    Trie holds */
-void printNodes(trieNode *node){
+/*void printNodes(trieNode *node){
 	trieNode* temp = node;
 
 	for(int i = 0; i < temp->childNodes; i++)
 		printNodes(temp->children[i]);
 
 	printNode(temp);
-}
+}*/
 
 /* Destroys the Trie by freeing the memory
    we allocated, while creating it */
-void destroyTrie(trieNode* node){
+/*void destroyTrie(trieNode* node){
 	trieNode* temp = node;
 
 	if(temp == NULL)
@@ -100,125 +94,145 @@ void destroyTrie(trieNode* node){
 		destroyTrie(temp->children[i]);
 
 	free(temp);
-}
+}*/
 
 /* Inserts a new value (word) in the Trie */
 void insertTrie(trieNode* node, char* word){
-	trieNode* temp = node;
+	trieNode* temp = node; 
+	trieNode* parent = node;
+	trieNode* previous = NULL;
+	int flag = 0;
+	int value; 
+
+	// printf("Inserting the word: %s\n",word);
 
 	/* Each iteration is responsible for a single
 	   letter of the word we're trying to insert */
 	for(int i = 0; i < strlen(word); i++){
+		// printf("Inserting the letter %c\n",word[i]);
 
-		/* The node we're currently working on doesn't have
-		   any children */
 		if(temp->children == NULL){
-			temp->arraySize = 2;
-			temp->childNodes++;
-
-			temp->children = (trieNode**)malloc((temp->arraySize)*sizeof(trieNode*));
+			temp->children = (trieNode*)malloc(sizeof(trieNode));
 			if(temp->children == NULL)
 				return;
+			temp->children->letter = word[i];
 
-			for(int j=0; j<(temp->arraySize); j++){
-				if(j>0)
-					temp->children[j] = NULL;
-				else{
-					temp->children[0] = (trieNode*)malloc(sizeof(trieNode));
-					if(temp->children[0] == NULL)
-						return;
-
-					temp->children[0]->letter = word[i];
-
-					/* Checking whether the current letter is the final one
-					   of a word */
-					if(i < (strlen(word)-1)){
-						temp->children[0]->isEndOfWord = False;
-						// temp->children[0]->listPtr = NULL;
-					}
-					else{
-						temp->children[0]->isEndOfWord = True;
-						// temp->children[0]->listPtr points to the head of a postings list
-					}
-
-					temp->children[0]->arraySize = 0;
-					temp->children[0]->childNodes = 0;
-					temp->children[0]->children = NULL;
-				}
-			}
-			
-			/* If there are still some letters left, we have
-			   to make the pointer point at the node we 
-			   recently created */
 			if(i < strlen(word)-1)
-				temp = temp->children[0];
+				temp->children->isEndOfWord = False;
+			else
+				temp->children->isEndOfWord = True;
+
+			temp->children->children = NULL;
+			temp->children->next = NULL;
+
+			if(i < strlen(word)-1)
+				temp = temp->children;
+
+			continue;
 		}
-		
-		/* The node we're currently on has at least
-		   one child */
+
 		else{
-			
-			/* PROBLEM: Not necessary if we're increasing an
-			   already stored word */
-			if(temp->childNodes == temp->arraySize){
-				temp->arraySize = (temp->arraySize)*2;
-				temp->children = (trieNode**)realloc(temp->children,(temp->arraySize)*sizeof(trieNode*));
-				if(temp->children == NULL)
-					return;
-				for(int k = temp->childNodes; k < temp->arraySize; k++)
-					temp->children[k] = NULL;
-			}
+			temp = temp->children;
 
-			int value;
-			int j;
-			for(j = 0; j < temp->childNodes; j++){
-				value = compareKeys(&word[i],&(temp->children[j]->letter));
+			while(temp != NULL){
+				value = compareKeys(&word[i],&(temp->letter));
 
-				if(value > 0)
+				if(value > 0){
+					previous = temp;
+					temp = temp->next;
 					continue;
-				if(value == 0)
+				}
+
+				if(value < 0)
 					break;
-				if(value < 0){
-					// memmove(temp->children[j+1],temp->children[j],(size_t)((temp->childNodes-j)*sizeof(trieNode*)));
-					for(int k = temp->arraySize - 1; k > j; k--)
-						temp->children[k] = temp->children[k-1];
-					temp->children[j] = NULL;
+
+				if(value == 0){
+					flag = 1;
 					break;
 				}
-			} 
+			}
 
-			if(temp->children[j] == NULL){
-				temp->childNodes++;	
-
-				temp->children[j] = (trieNode*)malloc(sizeof(trieNode));
-				if(temp->children[j] == NULL)
+			if(value > 0){
+				temp = (trieNode*)malloc(sizeof(trieNode));
+				if(temp == NULL)
 					return;
+				temp->next = previous->next;
+				previous->next = temp;
+				temp->letter = word[i];
+				if(i < strlen(word)-1)
+					temp->isEndOfWord = False;
+				else
+					temp->isEndOfWord = True;
+				temp->children = NULL;
+				continue;
+			}
 
-				temp->children[j]->letter = word[i];
+			if(value < 0){
+				if(flag == 1){
+					previous = temp;
+					while(temp->next != NULL){
+						previous = temp;
+						temp = temp->next;
+					}
 
-				/* The letter we just inserted does not
-				   indicate the end of a word */
-				if(i < (strlen(word)-1)){
-					temp->children[j]->isEndOfWord = False;
-					// temp->children[j]->listPtr = NULL;
+					temp = (trieNode*)malloc(sizeof(trieNode));
+					if(temp == NULL)
+						return;
+						
+					temp->letter = word[i];
+
+					if(i < strlen(word)-1)
+						temp->isEndOfWord = False;
+					else
+						temp->isEndOfWord = True;
+
+					temp->children = NULL;
+					temp->next = previous->next;
+					previous->next = temp;
+					previous = NULL;
+					continue;
+				}
+
+				if(previous == NULL){
+					previous = (trieNode*)malloc(sizeof(trieNode));
+					if(previous == NULL)
+						return;
+					previous->letter = word[i];
+
+					if(i < strlen(word)-1)
+						previous->isEndOfWord = False;
+					else
+						previous->isEndOfWord = True;
+
+					previous->children = NULL;
+					previous->next = temp;
+					parent->children = previous;
+					temp = previous;
+					previous = NULL;
+
+					continue;
 				}
 				else{
-					temp->children[j]->isEndOfWord = True;
-					// temp->children[0]->listPtr points to the head of a postings list
-				}
+					temp = (trieNode*)malloc(sizeof(trieNode));
+					if(temp == NULL)
+						return;
+					temp->letter = word[i];
 
-				/* The current node doesn't have any children.
-				   That's why we must initialize the following 
-				   values with zero */
-				temp->children[j]->arraySize = 0;
-				temp->children[j]->childNodes = 0;
-				temp->children[j]->children = NULL;
+					if(i < strlen(word)-1)
+						temp->isEndOfWord = False;
+					else
+						temp->isEndOfWord = True;
+
+					temp->children = NULL;
+					temp->next = previous->next;
+					previous->next = temp;
+					previous = NULL;
+					continue;
+				}
 			}
 
-			/* If we still have letters that we need to insert,
-			   we must change the node that we're working on */
-			if(i < strlen(word)-1)
-				temp = temp->children[j];
+			if(value == 0)
+				previous = NULL;	
 		}
 	}
 
@@ -228,7 +242,9 @@ void insertTrie(trieNode* node, char* word){
 /* Initializes the Trie by inserting its first values */
 void initializeTrie(int lines, char *delimiter, trieNode* node, map* array){
 	char* token;
+	// int textID;
 	for(int i = 0; i < lines; i++){
+		// textID = array[i].id;
 		token = strtok(array[i].text,delimiter);
 		while(token!=NULL){
 			insertTrie(node,token);

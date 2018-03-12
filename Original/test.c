@@ -80,8 +80,13 @@ int main(int argc, char *argv[]){
 	initializeRoot(&root);
 	// printNodes(root);		
 	
-	initializeTrie(lines," ",root,array);
-	// printNodes(root);
+	// initializeTrie(lines," ",root,array);
+	insertTrie(root,"be");
+	insertTrie(root,"bee");
+	insertTrie(root,"at");
+	insertTrie(root,"bees");
+
+	printNodes(root);
 
 	
 	/***************************/
@@ -91,6 +96,6 @@ int main(int argc, char *argv[]){
 	for(int i = 0; i<lines; i++)
 		free(array[i].text);
 	free(array);
-	// destroyTrie(root);
+	destroyTrie(root);
 	return 0;
 }
