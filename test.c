@@ -3,21 +3,13 @@
 #include <string.h>
 #include "functions.h"
 
-#define OK 0
-#define FILE_NOTOPEN -1
-#define MEMORY_ALLOCATIONERROR -2
-#define TEXTS_WRONG -3
-#define ERROR -4
-
-
 /* Command for terminal: ./minisearch -i docfile -k K */
 
 int main(int argc, char *argv[]){
 
 	if(argc != 5){
-		printf("Error! Not enough arguments");
-		printf(" were provided\n");
-		return -1;
+		printError(NOT_ENOUGH_ARGUMENTS);
+		return EXIT;
 	}
 
 	/*********************/
@@ -26,9 +18,8 @@ int main(int argc, char *argv[]){
 	FILE *fp;
 	fp = fopen(argv[2],"r");
 	if(fp == NULL){
-		printf("An error occured while trying to");
-		printf(" open the file\n");
-		return FILE_NOTOPEN;
+		printError(FILE_NOT_OPEN);
+		return EXIT;
 	}
 
 	/***********************************/
@@ -49,15 +40,18 @@ int main(int argc, char *argv[]){
 	map *array;
 	array = (map*)malloc(lines*sizeof(map));
 	if(array == NULL){
-		printf("An error occured while trying to");
-		printf(" allocate memory for the map\n");
-		return MEMORY_ALLOCATIONERROR;
+		printError(MEMORY_NOT_ALLOCATED);
+		return EXIT;
 	}
 
 	char *line = NULL;
 	int code = initializeMap(fp,line," ",array);
-	if(code == -1)
-		return -1;
+	if(code != OK){
+		printError(code);
+		return EXIT;
+	}
+
+
 	/**********************/
 	/*** CLOSING THE FILE ***/
 	/**********************/
@@ -74,13 +68,20 @@ int main(int argc, char *argv[]){
 	
 	trieNode* root;
 	root = (trieNode*)malloc(sizeof(trieNode));
-	if(root == NULL)
-		return MEMORY_ALLOCATIONERROR;
+	if(root == NULL){
+		printError(MEMORY_NOT_ALLOCATED);
+		return EXIT;
+	}
 
 	initializeRoot(&root);
 	// printNodes(root);		
 	
-	initializeTrie(lines," ",root,array);
+	code = initializeTrie(lines," ",root,array);
+	if(code != OK){
+		printError(code);
+		return EXIT;
+	}
+	
 	// printNodes(root);
 
 	

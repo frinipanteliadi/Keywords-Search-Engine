@@ -1,3 +1,11 @@
+#define OK 0
+#define NOT_ENOUGH_ARGUMENTS -1
+#define FILE_NOT_OPEN -2
+#define MEMORY_NOT_ALLOCATED -3
+#define WRONG_ORDER -4
+#define EXIT -5
+
+
 /* False = 0, True = 1 */
 typedef enum bool {False, True} bool;
 
@@ -25,6 +33,7 @@ typedef struct trieNode{
 	// postingsList *listPtr;		/*Pointer to postings list of a leaf node*/
 }trieNode;
 
+void printError(int);
 int initializeMap(FILE*, char*, char*, map*);
 void printMap(int, map*);
 int compareKeys(char*, char*);
@@ -32,6 +41,6 @@ void initializeRoot(trieNode **);
 void printNode(trieNode *);
 void printNodes(trieNode *);
 void destroyTrie(trieNode*);
-void insertTrie(trieNode*, char*);
-void initializeTrie(int, char *, trieNode*, map*);
+int insertTrie(trieNode*, char*);
+int initializeTrie(int, char *, trieNode*, map*);
 int getNumberOfLines(FILE*, char* lineptr);
