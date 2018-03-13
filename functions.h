@@ -4,7 +4,7 @@
 #define MEMORY_NOT_ALLOCATED -3
 #define WRONG_ORDER -4
 #define EXIT -5
-
+#define ERROR -6
 
 /* False = 0, True = 1 */
 typedef enum bool {False, True} bool;
@@ -34,7 +34,7 @@ typedef struct trieNode{
 }trieNode;
 
 void printError(int);
-int initializeMap(FILE*, char*, char*, map*);
+int initializeMap(FILE*, char*, map*, int);
 void printMap(int, map*);
 int compareKeys(char*, char*);
 void initializeRoot(trieNode **);
@@ -42,5 +42,5 @@ void printNode(trieNode *);
 void printNodes(trieNode *);
 void destroyTrie(trieNode*);
 int insertTrie(trieNode*, char*);
-int initializeTrie(int, char *, trieNode*, map*);
+int initializeTrie(int, trieNode*, map*);
 int getNumberOfLines(FILE*, char* lineptr);

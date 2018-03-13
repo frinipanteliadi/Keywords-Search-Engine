@@ -3,9 +3,21 @@
 #include <stdlib.h>
 #include "functions.h"
 
+/***************************/
+/*** ASSISTIVE FUNCTIONS ***/
+/***************************/
+
+/* Returns the difference between the ASCII values
+   of a and b */
+int compareKeys(char* a, char* b){
+	return((*a)-(*b));
+}	
+
+
 /**********************/
 /*** ERROR HANDLING ***/
 /**********************/
+
 void printError(int error){
 	switch(error){
 		case NOT_ENOUGH_ARGUMENTS:
@@ -26,28 +38,33 @@ void printError(int error){
 	}
 }
 
+
 /*********************/
 /*** MAP FUNCTIONS ***/
 /*********************/
 
 /* Parses the texts from the file into the map */
-int initializeMap(FILE* fp, char* line, char* delimiter,map* array){
+int initializeMap(FILE* fp, char* line, map* array,int lines){
 	size_t n = 0;
 	int i = 0;
 
 	while(getline(&line,&n,fp)!=-1){
+		if(i > lines)
+			return ERROR;
+		// printf("Line: %s\n",line);
 		char *id;
-		id = strtok(line,delimiter);
-		if(i != atoi(id)){
-			printf("Texts were given in the wrong order\n");
+		id = strtok(line," \t");
+		if(i != atoi(id))
 			return WRONG_ORDER;
-		}
+		
 		array[i].id = atoi(id);
 		char *text = strtok(NULL,"\n");
+		// printf("text: %s\n",text);
 		array[i].text = (char*)malloc(strlen(text)+1);
 		if(array[i].text == NULL)
 			return MEMORY_NOT_ALLOCATED;
 		strcpy(array[i].text,text);
+		// printf("array[%d].text: %s\n",i,array[i].text);
 		i++;
 	}
 
@@ -55,22 +72,19 @@ int initializeMap(FILE* fp, char* line, char* delimiter,map* array){
 }
 
 void printMap(int lines, map* ptr){
+	map* temp = ptr;
 	for(int i = 0; i < lines; i++){
 		printf("-----------------------\n");
-		printf(" *ID: %d\n",ptr[i].id);
-		printf(" *TEXT: %s\n",ptr[i].text);
+		printf(" *ID: %d\n",temp[i].id);
+		printf(" *TEXT: %s\n",temp[i].text);
 		printf("-----------------------\n");
 	}
 }
 
+
 /***************************/
 /***    TRIE FUNCTIONS   ***/
 /***************************/
-/* Returns the difference between the ASCII values
-   of a and b */
-int compareKeys(char* a, char* b){
-	return((*a)-(*b));
-}	
 
 /* Initializes all of the root's members */
 void initializeRoot(trieNode **root){
@@ -112,7 +126,29 @@ void printNode(trieNode *node){
    we allocated, while creating it */
 /*void destroyTrie(trieNode* node){
 	trieNode* temp = node;
+	trieNode* tmp = node;
 
+	while(temp != NULL){
+		while(temp->children != NULL)
+			temp = temp->children;
+
+		if(temp->next != NULL && temp->children != NULL){
+			tmp = temp;
+		}
+		else if(temp->next != NULL && temp->children == NULL){}
+		else if(temp->next == NULL && temp->children != NULL){}
+		else if(temp->next == NULL && temp->children == NULL){
+			tmp = temp;
+			if(temp->letter == 0){
+				free(tmp);
+				return;
+			}
+		}
+	}*/
+
+
+
+	/*trieNode* temp = node;
 	if(temp == NULL)
 		return;
 
@@ -127,15 +163,16 @@ int insertTrie(trieNode* node, char* word){
 	trieNode* temp = node; 
 	trieNode* parent = node;
 	trieNode* previous = NULL;
-	int flag = 0;
+	int flag = -1;
+	int code = 0;
 	int value; 
 
-	printf("Inserting the word: %s\n",word);
+	// printf("Inserting the word: %s\n",word);
 
 	/* Each iteration is responsible for a single
 	   letter of the word we're trying to insert */
 	for(int i = 0; i < strlen(word); i++){
-		printf("Inserting the letter %c\n",word[i]);
+		// printf("Inserting the letter %c\n",word[i]);
 
 		if(temp->children == NULL){
 			temp->children = (trieNode*)malloc(sizeof(trieNode));
@@ -173,7 +210,7 @@ int insertTrie(trieNode* node, char* word){
 					break;
 
 				if(value == 0){
-					flag = 1;
+					flag = i;
 					break;
 				}
 			}
@@ -190,36 +227,46 @@ int insertTrie(trieNode* node, char* word){
 				else
 					temp->isEndOfWord = True;
 				temp->children = NULL;
+				previous = NULL;
 				continue;
 			}
 
 			if(value < 0){
-				if(flag == 1){
-					previous = temp;
+				/* Up until the previous iteration, the letters we
+				   were trying to insert were already in the Trie. 
+				   This is the first letter that differs and we have 
+				   to insert it as the last element of the list */
+				if(flag == i-1/*1*/){
 					while(temp->next != NULL){
-						previous = temp;
 						temp = temp->next;
+						if(compareKeys(&word[i],&(temp->letter))==0){
+							code = 1;
+							break;
+						}
 					}
 
-					temp = (trieNode*)malloc(sizeof(trieNode));
-					if(temp == NULL)
-						return MEMORY_NOT_ALLOCATED;
-						
-					temp->letter = word[i];
+					if(code != 1){
+						temp->next = (trieNode*)malloc(sizeof(trieNode));
+						if(temp->next == NULL)
+							return MEMORY_NOT_ALLOCATED;
+							
+						temp->next->letter = word[i];
 
-					if(i < strlen(word)-1)
-						temp->isEndOfWord = False;
-					else
-						temp->isEndOfWord = True;
+						if(i < strlen(word)-1)
+							temp->next->isEndOfWord = False;
+						else
+							temp->next->isEndOfWord = True;
 
-					temp->children = NULL;
-					temp->next = previous->next;
-					previous->next = temp;
-					previous = NULL;
-					continue;
+						temp->next->children = NULL;
+						temp->next->next = NULL;
+						temp = temp->next;
+						previous = NULL;
+						continue;
+					}
 				}
 
-				if(previous == NULL){
+				/* Insert at the beginning */
+				else if(previous == NULL){
 					previous = (trieNode*)malloc(sizeof(trieNode));
 					if(previous == NULL)
 						return MEMORY_NOT_ALLOCATED;
@@ -257,27 +304,31 @@ int insertTrie(trieNode* node, char* word){
 				}
 			}
 
-			if(value == 0)
-				previous = NULL;	
+			if(code == 1 && i == strlen(word)-1)
+				temp->isEndOfWord = True;
+			
+			previous = NULL;	
 		}
 	}
 
 	return OK;
 }
 
-/* Initializes the Trie by inserting its first values */
-int initializeTrie(int lines, char *delimiter, trieNode* node, map* array){
+/* Initializes the Trie by inserting its first values.
+   Basically, it's responsible for the creation of 
+   the Trie */
+int initializeTrie(int lines, trieNode* node, map* array){
 	char* token;
 	int code;
 	// int textID;
 	for(int i = 0; i < lines; i++){
 		// textID = array[i].id;
-		token = strtok(array[i].text,delimiter);
+		token = strtok(array[i].text," \t");
 		while(token!=NULL){
 			code = insertTrie(node,token);
 			if(code != OK)
 				return code;
-			token = strtok(NULL,delimiter);
+			token = strtok(NULL," \t");
 		}
 	}
 	return OK;
@@ -287,6 +338,8 @@ int initializeTrie(int lines, char *delimiter, trieNode* node, map* array){
 /**********************/
 /*** FILE FUNCTIONS ***/
 /**********************/
+
+/* Returns the total number of lines of a file */
 int getNumberOfLines(FILE* fp, char* lineptr){
 	size_t n = 0;
 	int lines = 0;
@@ -295,3 +348,5 @@ int getNumberOfLines(FILE* fp, char* lineptr){
 	}
 	return lines;
 }
+
+

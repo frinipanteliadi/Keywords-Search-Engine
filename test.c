@@ -38,28 +38,34 @@ int main(int argc, char *argv[]){
 	/**********************/
 	
 	map *array;
-	array = (map*)malloc(lines*sizeof(map));
+	array = (map*)malloc((lines+1)*sizeof(map));
 	if(array == NULL){
 		printError(MEMORY_NOT_ALLOCATED);
 		return EXIT;
 	}
 
+	/*array[0].id = 0;
+	char *text = "My name is Frini and I am 21";
+	array[0].text = (char*)malloc(strlen(text)+1);
+	if(array[0].text == NULL)
+		return MEMORY_NOT_ALLOCATED;
+	strcpy(array[0].text,text);*/
+	// printf("%s\n",array[0].text);
+
 	char *line = NULL;
-	int code = initializeMap(fp,line," ",array);
+	int code = initializeMap(fp,line,array,lines);
 	if(code != OK){
 		printError(code);
 		return EXIT;
 	}
+	free(line);
 
+	printMap(lines,array); 
 
 	/**********************/
 	/*** CLOSING THE FILE ***/
 	/**********************/
-	free(line);
 	fclose(fp);
-
-	
-	// printMap(lines,array); 
 
 	/*********************************/
 	/*** CREATING AND INITIALIZING ***/
@@ -75,13 +81,13 @@ int main(int argc, char *argv[]){
 
 	initializeRoot(&root);
 	// printNodes(root);		
-	
-	code = initializeTrie(lines," ",root,array);
+
+	code = initializeTrie(lines,root,array);
 	if(code != OK){
 		printError(code);
 		return EXIT;
 	}
-	
+
 	// printNodes(root);
 
 	
@@ -89,9 +95,9 @@ int main(int argc, char *argv[]){
 	/*** DEALLOCATING MEMORY ***/
 	/***************************/
 	
-	for(int i = 0; i<lines; i++)
+	/*for(int i = 0; i<lines; i++)
 		free(array[i].text);
-	free(array);
+	free(array);*/
 	// destroyTrie(root);
-	return 0;
+	return OK;
 }
