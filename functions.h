@@ -34,7 +34,7 @@ typedef struct trieNode{
 }trieNode;
 
 void printError(int);
-int initializeMap(FILE*, char*, map*, int);
+int initializeMap(FILE*, map*, int);
 void printMap(int, map*);
 int compareKeys(char*, char*);
 void initializeRoot(trieNode **);
@@ -43,4 +43,4 @@ void printNodes(trieNode *);
 void destroyTrie(trieNode*);
 int insertTrie(trieNode*, char*);
 int initializeTrie(int, trieNode*, map*);
-int getNumberOfLines(FILE*, char* lineptr);
+int getNumberOfLines(FILE*);

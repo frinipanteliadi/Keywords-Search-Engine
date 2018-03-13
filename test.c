@@ -27,7 +27,7 @@ int main(int argc, char *argv[]){
 	/***      TEXTS IN THE FILE      ***/
 	/***********************************/
 	char* lineptr = NULL;
-	int lines = getNumberOfLines(fp,lineptr);
+	int lines = getNumberOfLines(fp);
 	// printf("The file has %d texts in total\n",lines);
 	rewind(fp);
 	free(lineptr);
@@ -52,13 +52,11 @@ int main(int argc, char *argv[]){
 	strcpy(array[0].text,text);*/
 	// printf("%s\n",array[0].text);
 
-	char *line = NULL;
-	int code = initializeMap(fp,line,array,lines);
+	int code = initializeMap(fp,array,lines);
 	if(code != OK){
 		printError(code);
 		return EXIT;
 	}
-	free(line);
 
 	printMap(lines,array); 
 
@@ -95,9 +93,9 @@ int main(int argc, char *argv[]){
 	/*** DEALLOCATING MEMORY ***/
 	/***************************/
 	
-	/*for(int i = 0; i<lines; i++)
+	for(int i = 0; i<lines; i++)
 		free(array[i].text);
-	free(array);*/
-	// destroyTrie(root);
+	free(array);
+	destroyTrie(root);
 	return OK;
 }

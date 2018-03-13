@@ -44,10 +44,10 @@ void printError(int error){
 /*********************/
 
 /* Parses the texts from the file into the map */
-int initializeMap(FILE* fp, char* line, map* array,int lines){
+int initializeMap(FILE* fp, map* array,int lines){
 	size_t n = 0;
 	int i = 0;
-
+	char *line = NULL;
 	while(getline(&line,&n,fp)!=-1){
 		if(i > lines)
 			return ERROR;
@@ -67,7 +67,7 @@ int initializeMap(FILE* fp, char* line, map* array,int lines){
 		// printf("array[%d].text: %s\n",i,array[i].text);
 		i++;
 	}
-
+	free(line);
 	return OK;
 }
 
@@ -124,39 +124,14 @@ void printNode(trieNode *node){
 
 /* Destroys the Trie by freeing the memory
    we allocated, while creating it */
-/*void destroyTrie(trieNode* node){
-	trieNode* temp = node;
-	trieNode* tmp = node;
-
-	while(temp != NULL){
-		while(temp->children != NULL)
-			temp = temp->children;
-
-		if(temp->next != NULL && temp->children != NULL){
-			tmp = temp;
-		}
-		else if(temp->next != NULL && temp->children == NULL){}
-		else if(temp->next == NULL && temp->children != NULL){}
-		else if(temp->next == NULL && temp->children == NULL){
-			tmp = temp;
-			if(temp->letter == 0){
-				free(tmp);
-				return;
-			}
-		}
-	}*/
-
-
-
-	/*trieNode* temp = node;
-	if(temp == NULL)
+void destroyTrie(trieNode* node){
+	if(node == NULL)
 		return;
 
-	for(int i = 0; i < temp->childNodes; i++)
-		destroyTrie(temp->children[i]);
-
-	free(temp);
-}*/
+	destroyTrie(node->next);
+	destroyTrie(node->children);
+	free(node);
+}
 
 /* Inserts a new value (word) in the Trie */
 int insertTrie(trieNode* node, char* word){
@@ -340,12 +315,14 @@ int initializeTrie(int lines, trieNode* node, map* array){
 /**********************/
 
 /* Returns the total number of lines of a file */
-int getNumberOfLines(FILE* fp, char* lineptr){
+int getNumberOfLines(FILE* fp){
 	size_t n = 0;
 	int lines = 0;
+	char* lineptr = NULL;
 	while(getline(&lineptr,&n,fp)!=-1){
 		lines++;
 	}
+	free(lineptr);
 	return lines;
 }
 
