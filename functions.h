@@ -33,14 +33,14 @@ typedef struct trieNode{
 	// postingsList *listPtr;		/*Pointer to postings list of a leaf node*/
 }trieNode;
 
+int compareKeys(char*, char*);
 void printError(int);
 int initializeMap(FILE*, map*, int);
 void printMap(int, map*);
-int compareKeys(char*, char*);
 void initializeRoot(trieNode **);
 void printNode(trieNode *);
 void printNodes(trieNode *);
-void destroyTrie(trieNode*);
 int insertTrie(trieNode*, char*);
 int initializeTrie(int, trieNode*, map*);
+void destroyTrie(trieNode*);
 int getNumberOfLines(FILE*);

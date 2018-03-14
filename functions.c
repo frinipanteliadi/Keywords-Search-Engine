@@ -113,24 +113,13 @@ void printNode(trieNode *node){
 
 /* Prints the data that each member of the 
    Trie holds */
-/*void printNodes(trieNode *node){
-	trieNode* temp = node;
-
-	for(int i = 0; i < temp->childNodes; i++)
-		printNodes(temp->children[i]);
-
-	printNode(temp);
-}*/
-
-/* Destroys the Trie by freeing the memory
-   we allocated, while creating it */
-void destroyTrie(trieNode* node){
+void printNodes(trieNode *node){
 	if(node == NULL)
 		return;
 
-	destroyTrie(node->next);
-	destroyTrie(node->children);
-	free(node);
+	printNodes(node->next);
+	printNodes(node->children);
+	printNode(node);
 }
 
 /* Inserts a new value (word) in the Trie */
@@ -138,8 +127,6 @@ int insertTrie(trieNode* node, char* word){
 	trieNode* temp = node; 
 	trieNode* parent = node;
 	trieNode* previous = NULL;
-	int flag = -1;
-	int code = 0;
 	int value; 
 
 	// printf("Inserting the word: %s\n",word);
@@ -153,23 +140,21 @@ int insertTrie(trieNode* node, char* word){
 			temp->children = (trieNode*)malloc(sizeof(trieNode));
 			if(temp->children == NULL)
 				return MEMORY_NOT_ALLOCATED;
+
 			temp->children->letter = word[i];
-
-			if(i < strlen(word)-1)
-				temp->children->isEndOfWord = False;
-			else
-				temp->children->isEndOfWord = True;
-
+			temp->children->isEndOfWord = False;
 			temp->children->children = NULL;
 			temp->children->next = NULL;
 
-			if(i < strlen(word)-1)
-				temp = temp->children;
+			temp = temp->children;
 
-			continue;
+			if(i == strlen(word)-1) {
+				temp->isEndOfWord = True;
+			}
 		}
 
 		else{
+			parent = temp;
 			temp = temp->children;
 
 			while(temp != NULL){
@@ -181,13 +166,8 @@ int insertTrie(trieNode* node, char* word){
 					continue;
 				}
 
-				if(value < 0)
+				if(value <= 0)
 					break;
-
-				if(value == 0){
-					flag = i;
-					break;
-				}
 			}
 
 			if(value > 0){
@@ -197,13 +177,8 @@ int insertTrie(trieNode* node, char* word){
 				temp->next = previous->next;
 				previous->next = temp;
 				temp->letter = word[i];
-				if(i < strlen(word)-1)
-					temp->isEndOfWord = False;
-				else
-					temp->isEndOfWord = True;
+				temp->isEndOfWord = False;
 				temp->children = NULL;
-				previous = NULL;
-				continue;
 			}
 
 			if(value < 0){
@@ -211,76 +186,36 @@ int insertTrie(trieNode* node, char* word){
 				   were trying to insert were already in the Trie. 
 				   This is the first letter that differs and we have 
 				   to insert it as the last element of the list */
-				if(flag == i-1/*1*/){
-					while(temp->next != NULL){
-						temp = temp->next;
-						if(compareKeys(&word[i],&(temp->letter))==0){
-							code = 1;
-							break;
-						}
-					}
-
-					if(code != 1){
-						temp->next = (trieNode*)malloc(sizeof(trieNode));
-						if(temp->next == NULL)
-							return MEMORY_NOT_ALLOCATED;
-							
-						temp->next->letter = word[i];
-
-						if(i < strlen(word)-1)
-							temp->next->isEndOfWord = False;
-						else
-							temp->next->isEndOfWord = True;
-
-						temp->next->children = NULL;
-						temp->next->next = NULL;
-						temp = temp->next;
-						previous = NULL;
-						continue;
-					}
-				}
 
 				/* Insert at the beginning */
-				else if(previous == NULL){
+				if(previous == NULL){
 					previous = (trieNode*)malloc(sizeof(trieNode));
 					if(previous == NULL)
 						return MEMORY_NOT_ALLOCATED;
 					previous->letter = word[i];
 
-					if(i < strlen(word)-1)
-						previous->isEndOfWord = False;
-					else
-						previous->isEndOfWord = True;
-
+					previous->isEndOfWord = False;
 					previous->children = NULL;
 					previous->next = temp;
 					parent->children = previous;
 					temp = previous;
-					previous = NULL;
-
-					continue;
 				}
 				else{
 					temp = (trieNode*)malloc(sizeof(trieNode));
 					if(temp == NULL)
 						return MEMORY_NOT_ALLOCATED;
+
 					temp->letter = word[i];
-
-					if(i < strlen(word)-1)
-						temp->isEndOfWord = False;
-					else
-						temp->isEndOfWord = True;
-
+					temp->isEndOfWord = False;
 					temp->children = NULL;
 					temp->next = previous->next;
 					previous->next = temp;
-					previous = NULL;
-					continue;
 				}
 			}
 
-			if(code == 1 && i == strlen(word)-1)
+			if(i == strlen(word)-1) {
 				temp->isEndOfWord = True;
+			}
 			
 			previous = NULL;	
 		}
@@ -307,6 +242,17 @@ int initializeTrie(int lines, trieNode* node, map* array){
 		}
 	}
 	return OK;
+}
+
+/* Destroys the Trie by freeing the memory
+   we allocated, while creating it */
+void destroyTrie(trieNode* node){
+	if(node == NULL)
+		return;
+
+	destroyTrie(node->next);
+	destroyTrie(node->children);
+	free(node);
 }
 
 

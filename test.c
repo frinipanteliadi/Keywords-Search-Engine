@@ -58,7 +58,7 @@ int main(int argc, char *argv[]){
 		return EXIT;
 	}
 
-	printMap(lines,array); 
+	// printMap(lines,array); 
 
 	/**********************/
 	/*** CLOSING THE FILE ***/
