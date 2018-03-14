@@ -92,7 +92,12 @@ int main(int argc, char *argv[]){
 	}
 
 	// printNodes(root);
-
+	printf("*******************\n\n");
+	printf("Enter the word you would like to search\n");
+	char* word;
+	scanf("%s",word);
+	searchTrie(root,word);
+	printf("\n\n*******************\n");
 	
 	/***************************/
 	/*** DEALLOCATING MEMORY ***/

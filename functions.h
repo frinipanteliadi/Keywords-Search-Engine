@@ -43,6 +43,7 @@ void printNodes(trieNode *);
 int insertTrie(trieNode*, char*,int);
 int initializeTrie(int, trieNode*, map*);
 void destroyTrie(trieNode*);
+void searchTrie(trieNode*,char*);
 int getNumberOfLines(FILE*);
 int addList(postingsList**, int);
 void deleteList(postingsListNode*);

@@ -269,6 +269,49 @@ void destroyTrie(trieNode* node){
 	free(node);
 }
 
+void searchTrie(trieNode* node,char* word){
+	trieNode* temp = node;
+	trieNode* previous = NULL;
+	int value;
+
+	for(int i = 0; i < strlen(word); i++){
+		if(temp->children != NULL){
+			temp = temp->children;
+
+			while(temp != NULL){
+				value = compareKeys(&word[i],&(temp->letter));
+
+				if(value > 0){
+					previous = temp;
+					temp = temp->next;
+					continue;
+				}
+
+				if(value <= 0)
+					break;
+			}
+
+			if(value < 0){
+				printf("The word %s is not in the Trie\n",word);
+				return;
+			}
+
+			if(i == strlen(word)-1 && temp->isEndOfWord == True){
+				postingsListNode* tmp = temp->listPtr->headPtr;
+				printf("------------------\n");
+				printf("The word %s appears in:\n",word );
+				while(tmp != NULL){
+					printf("* textID:%d %d time(s)\n",tmp->textID,tmp->occurences);
+					tmp = tmp->next;
+				}
+				printf("------------------\n");
+			}
+			
+			previous = NULL;
+			
+		}
+	}
+}
 
 /**********************/
 /*** FILE FUNCTIONS ***/
