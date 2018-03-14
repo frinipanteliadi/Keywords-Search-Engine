@@ -33,12 +33,12 @@ int main(int argc, char *argv[]){
 	free(lineptr);
 	
 
-	/**********************/	
+	/************************/	
 	/*** CREATING THE MAP ***/
-	/**********************/
+	/************************/
 	
 	map *array;
-	array = (map*)malloc((lines+1)*sizeof(map));
+	array = (map*)malloc((lines)*sizeof(map));
 	if(array == NULL){
 		printError(MEMORY_NOT_ALLOCATED);
 		return EXIT;
@@ -60,9 +60,9 @@ int main(int argc, char *argv[]){
 
 	// printMap(lines,array); 
 
-	/**********************/
+	/************************/
 	/*** CLOSING THE FILE ***/
-	/**********************/
+	/************************/
 	fclose(fp);
 
 	/*********************************/
@@ -79,6 +79,11 @@ int main(int argc, char *argv[]){
 
 	initializeRoot(&root);
 	// printNodes(root);		
+
+	/*************************/
+	/*** CREATING THE TRIE ***/ 
+	/***    STRUCTURE      ***/
+	/*************************/
 
 	code = initializeTrie(lines,root,array);
 	if(code != OK){

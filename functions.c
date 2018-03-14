@@ -91,7 +91,7 @@ void initializeRoot(trieNode **root){
 
 	(**root).letter = 0;
 	(**root).isEndOfWord = False;
-	// (**root).listPtr = NULL;
+	(**root).listPtr = NULL;
 	(**root).children = NULL;
 	(**root).next = NULL;
 }
@@ -123,11 +123,12 @@ void printNodes(trieNode *node){
 }
 
 /* Inserts a new value (word) in the Trie */
-int insertTrie(trieNode* node, char* word){
+int insertTrie(trieNode* node, char* word,int textID){
 	trieNode* temp = node; 
 	trieNode* parent = node;
 	trieNode* previous = NULL;
 	int value; 
+	int errorCode;
 
 	// printf("Inserting the word: %s\n",word);
 
@@ -145,11 +146,16 @@ int insertTrie(trieNode* node, char* word){
 			temp->children->isEndOfWord = False;
 			temp->children->children = NULL;
 			temp->children->next = NULL;
+			temp->children->listPtr = NULL;
 
 			temp = temp->children;
 
 			if(i == strlen(word)-1) {
 				temp->isEndOfWord = True;
+				errorCode = addList(&(temp->listPtr), textID);
+				if(errorCode != OK)
+					return errorCode;
+				// printPostingsList(temp->listPtr,word);
 			}
 		}
 
@@ -179,6 +185,7 @@ int insertTrie(trieNode* node, char* word){
 				temp->letter = word[i];
 				temp->isEndOfWord = False;
 				temp->children = NULL;
+				temp->listPtr = NULL;
 			}
 
 			if(value < 0){
@@ -197,6 +204,7 @@ int insertTrie(trieNode* node, char* word){
 					previous->isEndOfWord = False;
 					previous->children = NULL;
 					previous->next = temp;
+					previous->listPtr = NULL;
 					parent->children = previous;
 					temp = previous;
 				}
@@ -207,6 +215,7 @@ int insertTrie(trieNode* node, char* word){
 
 					temp->letter = word[i];
 					temp->isEndOfWord = False;
+					temp->listPtr = NULL;
 					temp->children = NULL;
 					temp->next = previous->next;
 					previous->next = temp;
@@ -215,6 +224,10 @@ int insertTrie(trieNode* node, char* word){
 
 			if(i == strlen(word)-1) {
 				temp->isEndOfWord = True;
+				errorCode = addList(&(temp->listPtr), textID);
+				if(errorCode != OK)
+					return errorCode;
+				// printPostingsList(temp->listPtr,word);
 			}
 			
 			previous = NULL;	
@@ -235,7 +248,7 @@ int initializeTrie(int lines, trieNode* node, map* array){
 		// textID = array[i].id;
 		token = strtok(array[i].text," \t");
 		while(token!=NULL){
-			code = insertTrie(node,token);
+			code = insertTrie(node,token,array[i].id);
 			if(code != OK)
 				return code;
 			token = strtok(NULL," \t");
@@ -252,6 +265,7 @@ void destroyTrie(trieNode* node){
 
 	destroyTrie(node->next);
 	destroyTrie(node->children);
+	deletePostingsList(node->listPtr);
 	free(node);
 }
 
@@ -273,3 +287,92 @@ int getNumberOfLines(FILE* fp){
 }
 
 
+/*********************/
+/*** POSTINGS LIST ***/ 
+/***   FUNCTIONS   ***/
+/*********************/
+
+int addList(postingsList** ptr, int textID){
+
+	postingsList* parent;
+	postingsListNode* temp;
+	postingsListNode* previous;
+	int value;
+
+	if(*ptr == NULL){
+		*ptr = (postingsList*)malloc(sizeof(postingsList));
+		if(*ptr == NULL)
+			return MEMORY_NOT_ALLOCATED;
+		(*ptr)->dfVector = 1;
+		(*ptr)->headPtr = (postingsListNode*)malloc(sizeof(postingsListNode));
+		if((*ptr)->headPtr == NULL)
+			return MEMORY_NOT_ALLOCATED;
+
+		(*ptr)->headPtr->textID = textID;
+		(*ptr)->headPtr->occurences = 1;
+		(*ptr)->headPtr->next = NULL;
+	}
+	
+	else{
+		parent = *ptr;
+		temp = parent->headPtr;
+
+		while(temp != NULL){
+			value = (textID - temp->textID);
+
+			if(value == 0)
+				break;
+			if(value > 0){
+				previous = temp;
+				temp = temp->next;
+				continue;
+			}
+		}
+
+		if(value == 0)
+			temp->occurences++;
+		else if(value > 0){
+			temp = (postingsListNode*)malloc(sizeof(postingsListNode));
+			if(temp == NULL)
+				return MEMORY_NOT_ALLOCATED;
+			temp->textID = textID;
+			temp->occurences = 1;
+			temp->next = previous->next;
+			previous->next = temp;
+			parent->dfVector++;
+		}
+	}
+
+	return OK;
+}
+
+void deleteList(postingsListNode* ptr){
+	if(ptr == NULL)
+		return;
+	deleteList(ptr->next);
+	free(ptr);
+}
+
+void deletePostingsList(postingsList* ptr){
+	if(ptr == NULL)
+		return;
+
+	postingsListNode* temp = ptr->headPtr;
+	deleteList(temp);
+}
+
+void printPostingsList(postingsList* ptr, char* word){
+	postingsListNode* temp = ptr->headPtr;
+	printf("\n******************\n");
+	printf("WORD: %s\n",word);
+	printf("dfVector: %d\n",ptr->dfVector);
+	while(temp != NULL){
+		printf("------------------\n");
+		printf("textID: %d\n",temp->textID);
+		printf("Occurences: %d\n",temp->occurences);
+		printf("Next: %x\n",temp->next);
+		printf("------------------\n");
+		temp = temp->next;
+	}
+	printf("******************\n\n");
+}

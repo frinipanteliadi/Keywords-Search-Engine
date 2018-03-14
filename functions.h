@@ -16,21 +16,21 @@ typedef struct map{
 
 typedef struct postingsListNode{
 	int textID;						/*ID of the text*/
-	int occurences;					/*Number of occurences in a specific text*/
-	struct postingsListNode *next;	/*Pointer to the next node of the postings list*/
+	int occurences;					/*Number of occurences inside the text*/
+	struct postingsListNode *next;	/*Pointer at the next node of the postings list*/
 }postingsListNode;
 
 typedef struct postingsList{
-	int df_vector;					/*Total number of texts in which the word appears*/
-	postingsListNode* ptr;			/*Pointer to the head of the postings list*/
+	int dfVector;					/*Total number of texts in which the word appears*/
+	postingsListNode* headPtr;	    /*Pointer at the head of the postings list*/
 }postingsList;
 
 typedef struct trieNode{
 	char letter;					/*Letter stored inside the node*/
 	bool isEndOfWord;				/*Flag which indicated whether a word ends in the current node*/
-	struct trieNode* children;		/*Points to a child node*/
-	struct trieNode* next;		/*Points to the next sibling node*/
-	// postingsList *listPtr;		/*Pointer to postings list of a leaf node*/
+	struct trieNode* children;		/*Points at a child node*/
+	struct trieNode* next;			/*Points at the next sibling node*/
+	postingsList* listPtr;		    /*Points at the node which holds information regarding the postings list*/
 }trieNode;
 
 int compareKeys(char*, char*);
@@ -40,7 +40,11 @@ void printMap(int, map*);
 void initializeRoot(trieNode **);
 void printNode(trieNode *);
 void printNodes(trieNode *);
-int insertTrie(trieNode*, char*);
+int insertTrie(trieNode*, char*,int);
 int initializeTrie(int, trieNode*, map*);
 void destroyTrie(trieNode*);
 int getNumberOfLines(FILE*);
+int addList(postingsList**, int);
+void deleteList(postingsListNode*);
+void deletePostingsList(postingsList*);
+void printPostingsList(postingsList*,char*);
