@@ -28,7 +28,7 @@ int main(int argc, char *argv[]){
 	/***********************************/
 	char* lineptr = NULL;
 	int lines = getNumberOfLines(fp);
-	printf("The file has %d texts in total\n",lines);
+	// printf("The file has %d texts in total\n",lines);
 	rewind(fp);
 	free(lineptr);
 	
@@ -85,7 +85,7 @@ int main(int argc, char *argv[]){
 	}
 	// printNodes(root);
 
-	printf("Enter the word you would like to search\n");
+	/*printf("Enter the word you would like to search\n");
 	char *word = NULL;
 	char*search;
 	size_t n = 0;
@@ -103,7 +103,7 @@ int main(int argc, char *argv[]){
 
 	printf("*******************\n\n");
 	searchTrie(root,search);
-	printf("\n\n*******************\n");
+	printf("\n\n*******************\n");*/
 
 	/***************************/
 	/*** DEALLOCATING MEMORY ***/

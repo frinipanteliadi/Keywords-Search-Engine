@@ -13,6 +13,19 @@ int compareKeys(char* a, char* b){
 	return((*a)-(*b));
 }	
 
+/* Returns the total number of words in a string */
+int getNumberOfWords(char* str){
+	int i = 0;
+	int words = 1;
+
+	while(str[i] != '\0'){
+		if(str[i]==' ' || str[i]=='\n' || str[i]=='\t')
+			words++;
+		i++;
+	}
+
+	return words;
+}
 
 /**********************/
 /*** ERROR HANDLING ***/
@@ -46,7 +59,7 @@ void printError(int error){
 /*** MAP FUNCTIONS ***/
 /*********************/
 
-/* Parses the texts from the file into the map */
+/* Passes the texts from the file into the map */
 int initializeMap(FILE* fp, map* array,int lines){
 	size_t n = 0;
 	int i = 0;
@@ -67,6 +80,7 @@ int initializeMap(FILE* fp, map* array,int lines){
 		if(array[i].text == NULL)
 			return MEMORY_NOT_ALLOCATED;
 		strcpy(array[i].text,text);
+		array[i].words = getNumberOfWords(array[i].text);
 		i++;
 	}
 	free(line);
@@ -79,6 +93,7 @@ void printMap(int lines, map* ptr){
 		printf("-----------------------\n");
 		printf(" *ID: %d\n",temp[i].id);
 		printf(" *TEXT: %s\n",temp[i].text);
+		printf(" *WORDS: %d\n",temp[i].words);
 		printf("-----------------------\n");
 	}
 }

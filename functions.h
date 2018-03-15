@@ -12,6 +12,7 @@ typedef enum bool {False, True} bool;
 typedef struct map{
 	int id;							/*ID of the text which is stored*/
 	char *text;						/*The actual text*/
+	int words;						/*Total number of words in the text*/
 }map;
 
 typedef struct postingsListNode{
@@ -34,6 +35,7 @@ typedef struct trieNode{
 }trieNode;
 
 int compareKeys(char*, char*);
+int getNumberOfWords(char*);
 void printError(int);
 int initializeMap(FILE*, map*, int);
 void printMap(int, map*);
