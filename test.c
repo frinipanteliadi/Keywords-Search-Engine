@@ -90,15 +90,28 @@ int main(int argc, char *argv[]){
 		printError(code);
 		return EXIT;
 	}
-
 	// printNodes(root);
-	printf("*******************\n\n");
+
 	printf("Enter the word you would like to search\n");
-	char* word;
-	scanf("%s",word);
-	searchTrie(root,word);
-	printf("\n\n*******************\n");
+	char *word = NULL;
+	char*search;
+	size_t n = 0;
+	while(getline(&word,&n,stdin)!=-1){
+		word = strtok(word,"\n");
+		search = (char*)malloc(strlen(word)+1);
+		if(search == NULL)
+			return MEMORY_NOT_ALLOCATED;
+		strcpy(search,word);
+		break;
+	}
 	
+	printf("\n");
+	free(word);
+
+	printf("*******************\n\n");
+	searchTrie(root,search);
+	printf("\n\n*******************\n");
+
 	/***************************/
 	/*** DEALLOCATING MEMORY ***/
 	/***************************/
