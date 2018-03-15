@@ -35,6 +35,9 @@ void printError(int error){
 			printf("The provided texts were given in");
 			printf(" the wrong order\n");
 			break;
+		case ERROR:
+			printf("An error occured\n");
+			break;
 	}
 }
 
@@ -49,9 +52,10 @@ int initializeMap(FILE* fp, map* array,int lines){
 	int i = 0;
 	char *line = NULL;
 	while(getline(&line,&n,fp)!=-1){
-		if(i > lines)
-			return ERROR;
-		// printf("Line: %s\n",line);
+		if(i == lines)
+			break;
+		if(strlen(line) == 1)
+			continue;
 		char *id;
 		id = strtok(line," \t");
 		if(i != atoi(id))
@@ -59,12 +63,10 @@ int initializeMap(FILE* fp, map* array,int lines){
 		
 		array[i].id = atoi(id);
 		char *text = strtok(NULL,"\n");
-		// printf("text: %s\n",text);
 		array[i].text = (char*)malloc(strlen(text)+1);
 		if(array[i].text == NULL)
 			return MEMORY_NOT_ALLOCATED;
 		strcpy(array[i].text,text);
-		// printf("array[%d].text: %s\n",i,array[i].text);
 		i++;
 	}
 	free(line);
@@ -269,6 +271,7 @@ void destroyTrie(trieNode* node){
 	free(node);
 }
 
+/* Searches for the given word in the Trie */
 void searchTrie(trieNode* node,char* word){
 	trieNode* temp = node;
 	trieNode* previous = NULL;
@@ -320,8 +323,11 @@ int getNumberOfLines(FILE* fp){
 	int lines = 0;
 	char* lineptr = NULL;
 	while(getline(&lineptr,&n,fp)!=-1){
+		if(strlen(lineptr) == 1)
+			continue;			
 		lines++;
 	}
+
 	free(lineptr);
 	return lines;
 }

@@ -28,7 +28,7 @@ int main(int argc, char *argv[]){
 	/***********************************/
 	char* lineptr = NULL;
 	int lines = getNumberOfLines(fp);
-	// printf("The file has %d texts in total\n",lines);
+	printf("The file has %d texts in total\n",lines);
 	rewind(fp);
 	free(lineptr);
 	
@@ -44,13 +44,6 @@ int main(int argc, char *argv[]){
 		return EXIT;
 	}
 
-	/*array[0].id = 0;
-	char *text = "My name is Frini and I am 21";
-	array[0].text = (char*)malloc(strlen(text)+1);
-	if(array[0].text == NULL)
-		return MEMORY_NOT_ALLOCATED;
-	strcpy(array[0].text,text);*/
-	// printf("%s\n",array[0].text);
 
 	int code = initializeMap(fp,array,lines);
 	if(code != OK){
