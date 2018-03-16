@@ -45,12 +45,16 @@ int main(int argc, char *argv[]){
 	}
 
 
-	int code = initializeMap(fp,array,lines);
+	int totalWords = 0;
+	int code = initializeMap(fp,array,lines,&totalWords);
 	if(code != OK){
 		printError(code);
 		return EXIT;
 	}
 
+	double average = averageNumberOfWords(totalWords,lines);
+	// printf("Total words in the document: %d\n",totalWords);
+	// printf("Average number of words: %1.2f\n",average);
 	// printMap(lines,array); 
 
 	/************************/
@@ -83,27 +87,54 @@ int main(int argc, char *argv[]){
 		printError(code);
 		return EXIT;
 	}
+
+	// printMap(lines,array);
 	// printNodes(root);
 
-	/*printf("Enter the word you would like to search\n");
-	char *word = NULL;
-	char*search;
-	size_t n = 0;
-	while(getline(&word,&n,stdin)!=-1){
-		word = strtok(word,"\n");
-		search = (char*)malloc(strlen(word)+1);
-		if(search == NULL)
-			return MEMORY_NOT_ALLOCATED;
-		strcpy(search,word);
-		break;
-	}
-	
-	printf("\n");
-	free(word);
 
-	printf("*******************\n\n");
-	searchTrie(root,search);
-	printf("\n\n*******************\n");*/
+	/**********************/
+	/*** USER INTERFACE ***/
+	/**********************/
+
+	welcomeMessage();
+
+	char *input = NULL;
+	size_t n = 0;
+	while(getline(&input,&n,stdin)!=-1){
+		input = strtok(input,"\n");					/* Input provided by the user */
+		printf("You entered: %s\n",input);
+		
+		char* operation = strtok(input," \t");		/* Operation required by the user */ 
+		char* arguments = strtok(NULL,"\n");		/* The arguments of the command */
+		if(arguments != NULL)
+			printf("Arguments: %s\n",arguments);
+	
+		if(strcmp(operation,"/search") == 0){
+			printf("You requested a search\n");
+			code = searchOperation(root,arguments,lines,array,average,2);
+			if(code != OK){
+				printError(code);
+				break;
+			}
+		}
+		else if(strcmp(operation,"/df") == 0)
+			printf("You requested the document frequency vector\n");
+		else if(strcmp(operation,"/tf") == 0)
+			printf("You requested the term frequency of a word\n");
+		else if(strcmp(operation,"/exit") == 0){
+			printf("Exiting the application\n");
+			break;
+		}
+		else
+			printf("Invalid input. Try again\n");
+	}
+
+	printf("\n");
+	free(input);
+
+	// postingsList* ptr;
+	// ptr = searchTrie(root,search);
+	// printPostingsList(ptr,search);
 
 	/***************************/
 	/*** DEALLOCATING MEMORY ***/
@@ -113,5 +144,6 @@ int main(int argc, char *argv[]){
 		free(array[i].text);
 	free(array);
 	destroyTrie(root);
+	// free(command);
 	return OK;
 }

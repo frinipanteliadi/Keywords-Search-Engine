@@ -34,10 +34,18 @@ typedef struct trieNode{
 	postingsList* listPtr;		    /*Points at the node which holds information regarding the postings list*/
 }trieNode;
 
+typedef struct scoreList{
+	int textID;
+	double score;
+	struct scoreList* next;
+}scoreList;
+
 int compareKeys(char*, char*);
 int getNumberOfWords(char*);
+double averageNumberOfWords(int,int);
+void welcomeMessage(void);
 void printError(int);
-int initializeMap(FILE*, map*, int);
+int initializeMap(FILE*, map*, int, int*);
 void printMap(int, map*);
 void initializeRoot(trieNode **);
 void printNode(trieNode *);
@@ -45,9 +53,14 @@ void printNodes(trieNode *);
 int insertTrie(trieNode*, char*,int);
 int initializeTrie(int, trieNode*, map*);
 void destroyTrie(trieNode*);
-void searchTrie(trieNode*,char*);
+postingsList* searchTrie(trieNode*,char*);
 int getNumberOfLines(FILE*);
 int addList(postingsList**, int);
 void deleteList(postingsListNode*);
 void deletePostingsList(postingsList*);
 void printPostingsList(postingsList*,char*);
+double getIDF(int, postingsList*);
+double getScore(postingsListNode*,postingsList*, int, map*, double);
+int searchOperation(trieNode*, char*, int, map*, double,int);
+int addScoreList(scoreList**, int, double);
+void deleteScoreList(scoreList*);

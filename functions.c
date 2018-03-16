@@ -1,3 +1,4 @@
+#include <math.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -26,6 +27,19 @@ int getNumberOfWords(char* str){
 
 	return words;
 }
+
+double averageNumberOfWords(int a, int b){
+	return((double)a)/((double)b);
+}
+
+void welcomeMessage(void){
+	printf("\nWelcome! Please choose one of the following options:\n");
+	printf("\n* /search: To search for documents containing the word(s)\n");
+	printf("* /df: To print the document frequency vector\n");
+	printf("* /tf: To print the term frequency of a word\n");
+	printf("* /exit: To exit the application\n\n");
+}
+
 
 /**********************/
 /*** ERROR HANDLING ***/
@@ -60,10 +74,11 @@ void printError(int error){
 /*********************/
 
 /* Passes the texts from the file into the map */
-int initializeMap(FILE* fp, map* array,int lines){
+int initializeMap(FILE* fp, map* array,int lines, int* totalWords){
 	size_t n = 0;
 	int i = 0;
 	char *line = NULL;
+	int total = 0;
 	while(getline(&line,&n,fp)!=-1){
 		if(i == lines)
 			break;
@@ -81,8 +96,11 @@ int initializeMap(FILE* fp, map* array,int lines){
 			return MEMORY_NOT_ALLOCATED;
 		strcpy(array[i].text,text);
 		array[i].words = getNumberOfWords(array[i].text);
+		total += array[i].words;
 		i++;
 	}
+
+	*totalWords = total;
 	free(line);
 	return OK;
 }
@@ -260,17 +278,21 @@ int insertTrie(trieNode* node, char* word,int textID){
 int initializeTrie(int lines, trieNode* node, map* array){
 	char* token;
 	int code;
-	// int textID;
 	for(int i = 0; i < lines; i++){
-		// textID = array[i].id;
-		token = strtok(array[i].text," \t");
+		char* textCopy = (char*)malloc(strlen(array[i].text)+1);
+		strcpy(textCopy,array[i].text);
+		if(textCopy == NULL)
+			return MEMORY_NOT_ALLOCATED;
+		token = strtok(textCopy," \t");
 		while(token!=NULL){
 			code = insertTrie(node,token,array[i].id);
 			if(code != OK)
 				return code;
 			token = strtok(NULL," \t");
 		}
+		free(textCopy);
 	}
+
 	return OK;
 }
 
@@ -287,7 +309,7 @@ void destroyTrie(trieNode* node){
 }
 
 /* Searches for the given word in the Trie */
-void searchTrie(trieNode* node,char* word){
+postingsList* searchTrie(trieNode* node,char* word){
 	trieNode* temp = node;
 	trieNode* previous = NULL;
 	int value;
@@ -307,25 +329,28 @@ void searchTrie(trieNode* node,char* word){
 				break;
 		}
 
-		if(value > 0){
-			printf("1)The word '%s' is not in the Trie\n",word);
-			return;
-		}
+		if(temp == NULL)
+			return NULL;
+		
 
 		if(value < 0){
 			printf("2)The word '%s' is not in the Trie\n",word);
-			return;
+			return NULL;
 		}
 
 		if(i == strlen(word)-1){
 			if(temp->isEndOfWord == True){
 				printf("The word '%s' is in the Trie\n",word);
-				return;
+				return temp->listPtr;
 			}
+			else
+				return NULL;
 		}
+
 		previous = NULL;
 		
 	}
+	return NULL;
 }
 
 /**********************/
@@ -420,10 +445,16 @@ void deletePostingsList(postingsList* ptr){
 
 	postingsListNode* temp = ptr->headPtr;
 	deleteList(temp);
+	free(ptr);
 }
 
 void printPostingsList(postingsList* ptr, char* word){
+	if(ptr == NULL){
+		printf("The word %s is not in the Trie\n",word);
+		return;
+	}
 	postingsListNode* temp = ptr->headPtr;
+
 	printf("\n******************\n");
 	printf("WORD: %s\n",word);
 	printf("dfVector: %d\n",ptr->dfVector);
@@ -436,4 +467,185 @@ void printPostingsList(postingsList* ptr, char* word){
 		temp = temp->next;
 	}
 	printf("******************\n\n");
+}
+
+
+/***********************/
+/*** SCORE FUNCTIONS ***/
+/***********************/
+double getIDF(int totalTexts, postingsList* ptr){
+	if(ptr == NULL)
+		return ERROR;
+
+	postingsListNode* temp = ptr->headPtr;
+	double numerator = ((totalTexts)-(ptr->dfVector))+0.5;
+	double denominator = (ptr->dfVector+0.5);
+	double fraction = numerator/denominator;
+	return(log10(fraction));
+}
+
+double getScore(postingsListNode* ptr, postingsList* ptr1, int totalTexts,map* array, double avg){
+
+	double numerator = (ptr->occurences)*(1.2+1.0);
+	double denominator = (ptr->occurences)+((1.2)*((1-0.75)+(0.75*((double)(array[ptr->textID].words)/avg))));
+	double fraction = numerator/denominator;
+	double idf = getIDF(totalTexts,ptr1);
+	double score = idf*fraction;
+	return score;			
+}
+
+/***************************/
+/*** OPERATION FUNCTIONS ***/
+/***************************/
+
+int searchOperation(trieNode* node, char* arguments, int totalTexts, map* array, double avg, int k){
+
+	if(arguments == NULL)
+		return NOT_ENOUGH_ARGUMENTS;
+
+	double score;
+
+	scoreList* head = NULL; 					/* Points at the head of the list which holds the scores */
+	trieNode* temp = node;						/* Points at the root of the Trie */
+	postingsList* ptr;							/* Points at the node which holds info for the postings list of a word */
+	postingsListNode* tempNode;
+	char* word;									/* The word we're currently working on */
+	int textID;									/* The ID of the text (document) we're currently working on */
+
+	int errorCode;
+
+	word = strtok(arguments," ,.-");
+  	while(word != NULL){
+    	ptr = searchTrie(node,word);
+    	if(ptr != NULL){   	
+    		tempNode = ptr->headPtr;
+    		while(tempNode != NULL){			/* Traverse the postings list */
+    			textID = tempNode->textID;
+				score = getScore(tempNode,ptr,totalTexts,array,avg);
+				errorCode = addScoreList(&head,textID,score);
+				tempNode = tempNode->next;
+			}
+		}
+   		word = strtok(NULL, " ,.-");
+  	}
+
+  	scoreList* tmp = head;
+  	while(tmp != NULL){
+  		printf("\n\n\n");
+  		printf("ID: %d\n",tmp->textID);
+  		printf("SCORE: %f\n",tmp->score);
+  		printf("TEXT: %s\n",array[tmp->textID].text);
+  		printf("\n\n\n");
+  		tmp = tmp->next;
+  	}
+
+  	free(head);
+  	return OK;
+}
+
+/****************************/
+/*** SCORE LIST FUNCTIONS ***/
+/****************************/
+
+int addScoreList(scoreList** ptr, int textID, double score){
+	scoreList* temp;
+	scoreList* previous = NULL;
+
+	double value;
+	double newScore = score;
+
+	if(*ptr == NULL){
+		*ptr = (scoreList*)malloc(sizeof(scoreList));
+		if(*ptr == NULL)
+			return MEMORY_NOT_ALLOCATED;
+		(*ptr)->textID = textID;
+		(*ptr)->score = newScore;
+		(*ptr)->next = NULL;
+	}
+	else{
+		temp = *ptr;
+		while(temp != NULL){
+			if(temp->textID != textID){
+				previous = temp;
+				temp = temp->next;
+				continue;
+			}
+			else{
+				if(previous == NULL){
+					temp->score += newScore;
+					return OK;
+				}
+				else{
+					newScore += temp->score;
+					previous->next = temp->next;
+					free(temp);
+					break;
+				}
+			}
+		}
+
+		previous = NULL;
+		temp = *ptr;
+		while(temp != NULL){
+			value = temp->score - newScore;
+
+			if(value > 0){
+				previous = temp;
+				temp = temp->next;
+				continue;
+			}
+			if(value <= 0)
+				break;
+		}
+
+		if(value > 0){
+			temp = (scoreList*)malloc(sizeof(scoreList));
+			if(temp == NULL)
+				return MEMORY_NOT_ALLOCATED;
+			temp->textID = textID;
+			temp->score = newScore;
+			temp->next = previous->next;
+			previous->next = temp;
+		}
+		else if(value < 0){
+			if(previous != NULL){
+				temp = (scoreList*)malloc(sizeof(scoreList));
+				if(temp == NULL)
+					return MEMORY_NOT_ALLOCATED;
+				temp->textID = textID;
+				temp->score = newScore;
+				temp->next = previous->next;
+				previous->next = temp;
+			}
+			else{
+				previous = (scoreList*)malloc(sizeof(scoreList));
+				if(previous == NULL)
+					return MEMORY_NOT_ALLOCATED;
+				previous->textID = textID;
+				previous->score = newScore;
+				previous->next = temp;
+				(*ptr) = previous;
+			}
+		}
+		else if(value == 0){
+			previous = temp;
+			temp = (scoreList*)malloc(sizeof(scoreList));
+			if(temp == NULL)
+				return MEMORY_NOT_ALLOCATED;
+			temp->textID = textID;
+			temp->score = newScore;
+			temp->next = previous->next;
+			previous->next = temp;
+		}
+
+	}
+
+	return OK;
+}
+
+void deleteScoreList(scoreList* ptr){
+	if(ptr == NULL)
+		return;
+	deleteScoreList(ptr->next);
+	free(ptr);
 }
