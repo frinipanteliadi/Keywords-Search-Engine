@@ -42,7 +42,21 @@ void welcomeMessage(void){
 	printf("* /exit: To exit the application\n\n");
 }
 
-
+/* Returns the number of words a list of arguments has */
+int getTotalArguments(char** ptr, char* arguments){
+	int wordCount = 0;
+	char* copy;
+	(*ptr) = (char*)malloc(strlen(arguments)+1);
+	if(*ptr == NULL)
+		return MEMORY_NOT_ALLOCATED;
+	strcpy((*ptr),arguments);
+	copy = strtok((*ptr)," \t");
+	while(copy != NULL){
+		wordCount++;
+		copy = strtok(NULL," \t");
+	}
+	return wordCount;
+}
 /**********************/
 /*** ERROR HANDLING ***/
 /**********************/
@@ -479,8 +493,10 @@ void printPostingsList(postingsList* ptr, char* word){
 void printAllDF(trieNode* node){
 	if(node == NULL)
 		return;
-	printAllDF(node->next);
+	// printAllDF(node->next);
+	// printAllDF(node->children);
 	printAllDF(node->children);
+	printAllDF(node->next);
 	if(node->isEndOfWord == True)
 		printf("%s %d\n",node->listPtr->word,node->listPtr->dfVector);
 }
@@ -520,18 +536,30 @@ int searchOperation(trieNode* node, char* arguments, int totalTexts, map* array,
 		return ARGUMENTS_ERROR;
 
 	double score;
-
 	scoreList* head = NULL; 					/* Points at the head of the list which holds the scores */
-	// trieNode* temp = node;						/* Points at the root of the Trie */
 	postingsList* ptr;							/* Points at the node which holds info for the postings list of a word */
 	postingsListNode* tempNode;
 	char* word;									/* The word we're currently working on */
 	int textID;									/* The ID of the text (document) we're currently working on */
-
 	int errorCode;
+	int wordCount = 0;
+	char* argumentsCopy;
+	wordCount = getTotalArguments(&argumentsCopy,arguments);
+	free(argumentsCopy);
 
-	word = strtok(arguments," ,.-");
+	char** wordKeeping = (char**)malloc(wordCount*sizeof(char*));
+	if(wordKeeping == NULL)
+		return MEMORY_NOT_ALLOCATED;
+
+	int i = 0;
+	word = strtok(arguments," \t");
   	while(word != NULL){
+  		
+  		wordKeeping[i] = (char*)malloc(strlen(word)+1);
+  		if(wordKeeping[i] == NULL)
+  			return MEMORY_NOT_ALLOCATED;
+  		strcpy(wordKeeping[i],word);
+
     	ptr = searchTrie(node,word);
     	if(ptr != NULL){   	
     		tempNode = ptr->headPtr;
@@ -542,24 +570,59 @@ int searchOperation(trieNode* node, char* arguments, int totalTexts, map* array,
 				tempNode = tempNode->next;
 			}
 		}
-   		word = strtok(NULL, " ,.-");
+   		word = strtok(NULL, " \t");
+   		i++;
   	}
 
   	scoreList* tmp = head;
-  	
+
   	struct winsize w;
 	ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
-	int terminalRows = w.ws_row;
 	int terminalColumns = w.ws_col;
 
-	int columnCounter = 0;
+	char* wordCopy;
+	int columnCounter;
 
-  	for(int i = 0; i < k; i++){
+	printf("\n");
+  	for(int i = 1; i < k+1; i++){
+  		if(tmp == NULL)
+  			break;	
+  		columnCounter = 0;
+
   		printf("%d.( %d)[%5.4f] ",i,tmp->textID,tmp->score);
-  		printf("TEXT: %s\n",array[tmp->textID].text);
+  		size_t len = snprintf(NULL,0,"%d.( %d)[%5.4f] ",i,tmp->textID,tmp->score);
+  		columnCounter += len;
+
+  		char* textCopy = (char*)malloc(strlen(array[tmp->textID].text)+1);
+  		if(textCopy == NULL)
+  			return MEMORY_NOT_ALLOCATED;
+  		strcpy(textCopy,array[tmp->textID].text);
+
+  		wordCopy = strtok(textCopy," \t");
+  		while(wordCopy != NULL){
+  			if((strlen(wordCopy)+1+columnCounter) < terminalColumns){
+  				printf("%s ",wordCopy);
+  				columnCounter = columnCounter+strlen(wordCopy)+1;
+  			}
+  			else{
+  				printf("\n");
+  				for(int i = 0; i < len; i++)
+  					printf(" ");
+  				printf("%s ",wordCopy);
+  				columnCounter = 0;
+  				columnCounter = (columnCounter+len+strlen(wordCopy)+1);
+  			}
+  			wordCopy = strtok(NULL," \t");
+  		}
+
+  		printf("\n\n");
   		tmp = tmp->next;
+  		free(textCopy);	
   	}
 
+  	for(int i = 0; i < wordCount; i++)
+  		free(wordKeeping[i]);  	
+  	free(wordKeeping);
   	free(head);
   	return OK;
 }
@@ -572,11 +635,44 @@ int dfOperation(trieNode* node,char* arguments, int totalTexts, map* array){
 	if(arguments != NULL){
 		ptr = searchTrie(node,arguments);
 		if(ptr != NULL)
-			printf("%s %d\n",arguments,ptr->dfVector);		
+			printf("%s %d\n",arguments,ptr->dfVector);
+		else{
+			printf("The word you requested is not included in any");		
+			printf(" of the given files\n");
+		}
 	}
 	else
 		printAllDF(node);
 	return OK;
+}
+
+int tfOperation(trieNode* node, char* arguments){
+	if(arguments == NULL)
+		return ARGUMENTS_ERROR;
+
+	char* word;
+	char* temp_textID;
+	int textID;
+
+	temp_textID = strtok(arguments," \t");
+	textID = atoi(temp_textID);
+	word = strtok(NULL," \t");
+	if(word == NULL)
+		return ARGUMENTS_ERROR;
+
+	postingsList* ptr = searchTrie(node,word);
+	postingsListNode* tempNode = ptr->headPtr;
+
+	while(tempNode != NULL){
+		if(tempNode->textID == textID){
+			printf("%d %s %d\n",textID,word,tempNode->occurences);
+			break;
+		}
+		else
+			tempNode = tempNode->next;
+	}
+	return OK;
+
 }
 
 /****************************/

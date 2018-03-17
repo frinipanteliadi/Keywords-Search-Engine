@@ -3,25 +3,46 @@
 #include <string.h>
 #include "functions.h"
 
-/* Command for terminal: ./minisearch -i docfile -k K */
+//     Commands for terminal: 
+// 	./minisearch -i docfile -k K 
+// 	./minisearch -k K -i docfile
+// 	./minisearch -i docfile
 
 int main(int argc, char *argv[]){
 
-	if(argc != 5){
+	/******************************/
+	/***   OPENING THE FILE     ***/
+	/***	     AND            ***/
+	/*** HANDLING THE ARGUMENTS ***/
+	/******************************/
+	if(argc < 3){
+		printError(ARGUMENTS_ERROR);
+		return EXIT;
+	}
+	else if(argc == 4){
+		printError(ARGUMENTS_ERROR);
+		return EXIT;
+	}
+	else if(argc > 5){
 		printError(ARGUMENTS_ERROR);
 		return EXIT;
 	}
 
-	int k = atoi(argv[4]);
 
-	/*********************/
-	/*** OPEN THE FILE ***/
-	/*********************/
 	FILE *fp;
-	fp = fopen(argv[2],"r");
-	if(fp == NULL){
-		printError(FILE_NOT_OPEN);
-		return EXIT;
+	char* docfile;
+	int k = 10;
+
+	for(int i = 1; i < argc; i+=2){
+		if(strcmp(argv[i],"-i") == 0){
+			fp = fopen(argv[i+1],"r");
+			if(fp == NULL){
+				printError(FILE_NOT_OPEN);
+				return ERROR;
+			}
+		}
+		else if(strcmp(argv[i],"-k") == 0)
+			k = atoi(argv[i+1]);
 	}
 
 	/***********************************/
@@ -124,8 +145,14 @@ int main(int argc, char *argv[]){
 				break;
 			}
 		}
-		else if(strcmp(operation,"/tf") == 0)
-			printf("You requested the term frequency of a word\n");
+		else if(strcmp(operation,"/tf") == 0){
+			// printf("You requested the term frequency of a word\n");
+			code = tfOperation(root,arguments);
+			if(code != OK){
+				printError(code);
+				break;
+			}
+		}
 		else if(strcmp(operation,"/exit") == 0){
 			printf("Exiting the application\n");
 			break;
