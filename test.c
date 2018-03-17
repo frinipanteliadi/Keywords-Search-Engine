@@ -8,9 +8,11 @@
 int main(int argc, char *argv[]){
 
 	if(argc != 5){
-		printError(NOT_ENOUGH_ARGUMENTS);
+		printError(ARGUMENTS_ERROR);
 		return EXIT;
 	}
+
+	int k = atoi(argv[4]);
 
 	/*********************/
 	/*** OPEN THE FILE ***/
@@ -102,23 +104,26 @@ int main(int argc, char *argv[]){
 	size_t n = 0;
 	while(getline(&input,&n,stdin)!=-1){
 		input = strtok(input,"\n");					/* Input provided by the user */
-		printf("You entered: %s\n",input);
 		
 		char* operation = strtok(input," \t");		/* Operation required by the user */ 
 		char* arguments = strtok(NULL,"\n");		/* The arguments of the command */
-		if(arguments != NULL)
-			printf("Arguments: %s\n",arguments);
-	
+		
 		if(strcmp(operation,"/search") == 0){
-			printf("You requested a search\n");
-			code = searchOperation(root,arguments,lines,array,average,2);
+			// printf("You requested a search\n");
+			code = searchOperation(root,arguments,lines,array,average,k);
 			if(code != OK){
 				printError(code);
 				break;
 			}
 		}
-		else if(strcmp(operation,"/df") == 0)
-			printf("You requested the document frequency vector\n");
+		else if(strcmp(operation,"/df") == 0){
+			// printf("You requested the document frequency vector\n");
+			code = dfOperation(root,arguments,lines,array);
+			if(code != OK){
+				printError(code);
+				break;
+			}
+		}
 		else if(strcmp(operation,"/tf") == 0)
 			printf("You requested the term frequency of a word\n");
 		else if(strcmp(operation,"/exit") == 0){
@@ -127,14 +132,11 @@ int main(int argc, char *argv[]){
 		}
 		else
 			printf("Invalid input. Try again\n");
+		printf("\n\n");
 	}
 
 	printf("\n");
 	free(input);
-
-	// postingsList* ptr;
-	// ptr = searchTrie(root,search);
-	// printPostingsList(ptr,search);
 
 	/***************************/
 	/*** DEALLOCATING MEMORY ***/
@@ -144,6 +146,5 @@ int main(int argc, char *argv[]){
 		free(array[i].text);
 	free(array);
 	destroyTrie(root);
-	// free(command);
 	return OK;
 }

@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <unistd.h>
+#include <sys/ioctl.h>
 #include "functions.h"
 
 /***************************/
@@ -47,9 +49,9 @@ void welcomeMessage(void){
 
 void printError(int error){
 	switch(error){
-		case NOT_ENOUGH_ARGUMENTS:
-			printf("Not enough arguments were provided");
-			printf(" in the command line\n");
+		case ARGUMENTS_ERROR:
+			printf("The provided arguments are not");
+			printf(" in the right form\n");
 			break;
 		case FILE_NOT_OPEN:
 			printf("Failure to open the file\n");
@@ -187,7 +189,7 @@ int insertTrie(trieNode* node, char* word,int textID){
 
 			if(i == strlen(word)-1) {
 				temp->isEndOfWord = True;
-				errorCode = addList(&(temp->listPtr), textID);
+				errorCode = addList(&(temp->listPtr), textID, word);
 				if(errorCode != OK)
 					return errorCode;
 				// printPostingsList(temp->listPtr,word);
@@ -259,7 +261,7 @@ int insertTrie(trieNode* node, char* word,int textID){
 
 			if(i == strlen(word)-1) {
 				temp->isEndOfWord = True;
-				errorCode = addList(&(temp->listPtr), textID);
+				errorCode = addList(&(temp->listPtr), textID, word);
 				if(errorCode != OK)
 					return errorCode;
 				// printPostingsList(temp->listPtr,word);
@@ -334,13 +336,13 @@ postingsList* searchTrie(trieNode* node,char* word){
 		
 
 		if(value < 0){
-			printf("2)The word '%s' is not in the Trie\n",word);
+			// printf("2)The word '%s' is not in the Trie\n",word);
 			return NULL;
 		}
 
 		if(i == strlen(word)-1){
 			if(temp->isEndOfWord == True){
-				printf("The word '%s' is in the Trie\n",word);
+				// printf("The word '%s' is in the Trie\n",word);
 				return temp->listPtr;
 			}
 			else
@@ -378,7 +380,7 @@ int getNumberOfLines(FILE* fp){
 /***   FUNCTIONS   ***/
 /*********************/
 
-int addList(postingsList** ptr, int textID){
+int addList(postingsList** ptr, int textID, char* theWord){
 
 	postingsList* parent;
 	postingsListNode* temp;
@@ -397,6 +399,10 @@ int addList(postingsList** ptr, int textID){
 		(*ptr)->headPtr->textID = textID;
 		(*ptr)->headPtr->occurences = 1;
 		(*ptr)->headPtr->next = NULL;
+		(*ptr)->word = (char*)malloc(strlen(theWord)+1);
+		if((*ptr)->word == NULL)
+			return MEMORY_NOT_ALLOCATED;
+		strcpy((*ptr)->word,theWord);
 	}
 	
 	else{
@@ -445,6 +451,7 @@ void deletePostingsList(postingsList* ptr){
 
 	postingsListNode* temp = ptr->headPtr;
 	deleteList(temp);
+	free(ptr->word);
 	free(ptr);
 }
 
@@ -456,7 +463,7 @@ void printPostingsList(postingsList* ptr, char* word){
 	postingsListNode* temp = ptr->headPtr;
 
 	printf("\n******************\n");
-	printf("WORD: %s\n",word);
+	printf("WORD: %s\n",ptr->word);
 	printf("dfVector: %d\n",ptr->dfVector);
 	while(temp != NULL){
 		printf("------------------\n");
@@ -467,6 +474,15 @@ void printPostingsList(postingsList* ptr, char* word){
 		temp = temp->next;
 	}
 	printf("******************\n\n");
+}
+
+void printAllDF(trieNode* node){
+	if(node == NULL)
+		return;
+	printAllDF(node->next);
+	printAllDF(node->children);
+	if(node->isEndOfWord == True)
+		printf("%s %d\n",node->listPtr->word,node->listPtr->dfVector);
 }
 
 
@@ -501,12 +517,12 @@ double getScore(postingsListNode* ptr, postingsList* ptr1, int totalTexts,map* a
 int searchOperation(trieNode* node, char* arguments, int totalTexts, map* array, double avg, int k){
 
 	if(arguments == NULL)
-		return NOT_ENOUGH_ARGUMENTS;
+		return ARGUMENTS_ERROR;
 
 	double score;
 
 	scoreList* head = NULL; 					/* Points at the head of the list which holds the scores */
-	trieNode* temp = node;						/* Points at the root of the Trie */
+	// trieNode* temp = node;						/* Points at the root of the Trie */
 	postingsList* ptr;							/* Points at the node which holds info for the postings list of a word */
 	postingsListNode* tempNode;
 	char* word;									/* The word we're currently working on */
@@ -530,17 +546,37 @@ int searchOperation(trieNode* node, char* arguments, int totalTexts, map* array,
   	}
 
   	scoreList* tmp = head;
-  	while(tmp != NULL){
-  		printf("\n\n\n");
-  		printf("ID: %d\n",tmp->textID);
-  		printf("SCORE: %f\n",tmp->score);
+  	
+  	struct winsize w;
+	ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+	int terminalRows = w.ws_row;
+	int terminalColumns = w.ws_col;
+
+	int columnCounter = 0;
+
+  	for(int i = 0; i < k; i++){
+  		printf("%d.( %d)[%5.4f] ",i,tmp->textID,tmp->score);
   		printf("TEXT: %s\n",array[tmp->textID].text);
-  		printf("\n\n\n");
   		tmp = tmp->next;
   	}
 
   	free(head);
   	return OK;
+}
+
+int dfOperation(trieNode* node,char* arguments, int totalTexts, map* array){
+	postingsList* ptr;
+	postingsListNode* tempNode;
+	char* word;
+
+	if(arguments != NULL){
+		ptr = searchTrie(node,arguments);
+		if(ptr != NULL)
+			printf("%s %d\n",arguments,ptr->dfVector);		
+	}
+	else
+		printAllDF(node);
+	return OK;
 }
 
 /****************************/

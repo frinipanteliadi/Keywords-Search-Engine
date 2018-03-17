@@ -1,5 +1,5 @@
 #define OK 0
-#define NOT_ENOUGH_ARGUMENTS -1
+#define ARGUMENTS_ERROR -1
 #define FILE_NOT_OPEN -2
 #define MEMORY_NOT_ALLOCATED -3
 #define WRONG_ORDER -4
@@ -24,6 +24,7 @@ typedef struct postingsListNode{
 typedef struct postingsList{
 	int dfVector;					/*Total number of texts in which the word appears*/
 	postingsListNode* headPtr;	    /*Pointer at the head of the postings list*/
+	char* word;					
 }postingsList;
 
 typedef struct trieNode{
@@ -55,12 +56,14 @@ int initializeTrie(int, trieNode*, map*);
 void destroyTrie(trieNode*);
 postingsList* searchTrie(trieNode*,char*);
 int getNumberOfLines(FILE*);
-int addList(postingsList**, int);
+int addList(postingsList**, int, char*);
 void deleteList(postingsListNode*);
 void deletePostingsList(postingsList*);
 void printPostingsList(postingsList*,char*);
+void printAllDF(trieNode* node);
 double getIDF(int, postingsList*);
 double getScore(postingsListNode*,postingsList*, int, map*, double);
-int searchOperation(trieNode*, char*, int, map*, double,int);
+int searchOperation(trieNode*, char*, int, map*, double, int);
+int dfOperation(trieNode*, char*, int, map*);
 int addScoreList(scoreList**, int, double);
 void deleteScoreList(scoreList*);
