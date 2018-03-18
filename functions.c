@@ -580,6 +580,9 @@ int searchOperation(trieNode* node, char* arguments, int totalTexts, map* array,
 	ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
 	int terminalColumns = w.ws_col;
 
+	underlineList* listHead = NULL;
+	underlineList* tempUnderline;
+
 	char* wordCopy;
 	int columnCounter;
 
@@ -600,21 +603,87 @@ int searchOperation(trieNode* node, char* arguments, int totalTexts, map* array,
 
   		wordCopy = strtok(textCopy," \t");
   		while(wordCopy != NULL){
+
   			if((strlen(wordCopy)+1+columnCounter) < terminalColumns){
   				printf("%s ",wordCopy);
+  				for(int j = 0; j < wordCount; j++){
+	  				if(strcmp(wordCopy,wordKeeping[j]) == 0){
+	  					errorCode = addUnderlineList(&listHead,columnCounter,strlen(wordCopy));
+	  					break;
+	  				}
+  				}
   				columnCounter = columnCounter+strlen(wordCopy)+1;
   			}
   			else{
+  				printf("\n");
+  			
+  				tempUnderline = listHead;
+  				int isStart = 1;
+  				underlineList* previousUnderline = NULL;
+  				while(tempUnderline != NULL){
+  					if(isStart){
+	  					for(int l = 0; l < tempUnderline->startColumn; l++)
+	  						printf(" ");
+	  					for(int l = 0; l < tempUnderline->wordLength; l++)
+	  						printf("^");
+	  					isStart = 0;
+					}
+					else{
+						for(int l = previousUnderline->startColumn + previousUnderline->wordLength; l < tempUnderline->startColumn; l++)
+							printf(" ");
+						for(int l = 0; l < tempUnderline->wordLength; l++)
+	  						printf("^");
+					}
+					previousUnderline = tempUnderline;
+  					tempUnderline = tempUnderline->next;
+  				}
+
+  				deleteUnderlineList(listHead);
+  				listHead = NULL; 
+
   				printf("\n");
   				for(int i = 0; i < len; i++)
   					printf(" ");
   				printf("%s ",wordCopy);
   				columnCounter = 0;
-  				columnCounter = (columnCounter+len+strlen(wordCopy)+1);
+
+  				for(int j = 0; j < wordCount; j++){
+	  				if(strcmp(wordCopy,wordKeeping[j]) == 0){
+	  					errorCode = addUnderlineList(&listHead,columnCounter+len,strlen(wordCopy));
+	  					break;
+	  				}
+  				}
+  				columnCounter = (len+strlen(wordCopy)+1);
   			}
   			wordCopy = strtok(NULL," \t");
   		}
 
+  		printf("\n");
+  			
+		tempUnderline = listHead;
+		int isStart = 1;
+		underlineList* previousUnderline = NULL;
+		while(tempUnderline != NULL){
+			if(isStart){
+				for(int l = 0; l < tempUnderline->startColumn; l++)
+					printf(" ");
+				for(int l = 0; l < tempUnderline->wordLength; l++)
+					printf("^");
+				isStart = 0;
+		}
+		else{
+			for(int l = previousUnderline->startColumn + previousUnderline->wordLength; l < tempUnderline->startColumn; l++)
+				printf(" ");
+			for(int l = 0; l < tempUnderline->wordLength; l++)
+					printf("^");
+		}
+		previousUnderline = tempUnderline;
+			tempUnderline = tempUnderline->next;
+		}
+
+		deleteUnderlineList(listHead);
+		listHead = NULL; 
+  		
   		printf("\n\n");
   		tmp = tmp->next;
   		free(textCopy);	
@@ -623,7 +692,7 @@ int searchOperation(trieNode* node, char* arguments, int totalTexts, map* array,
   	for(int i = 0; i < wordCount; i++)
   		free(wordKeeping[i]);  	
   	free(wordKeeping);
-  	free(head);
+  	deleteScoreList(head);
   	return OK;
 }
 
@@ -760,14 +829,15 @@ int addScoreList(scoreList** ptr, int textID, double score){
 			}
 		}
 		else if(value == 0){
-			previous = temp;
-			temp = (scoreList*)malloc(sizeof(scoreList));
-			if(temp == NULL)
+			scoreList* newTemp;
+			//previous = temp;
+			newTemp = (scoreList*)malloc(sizeof(scoreList));
+			if(newTemp == NULL)
 				return MEMORY_NOT_ALLOCATED;
-			temp->textID = textID;
-			temp->score = newScore;
-			temp->next = previous->next;
-			previous->next = temp;
+			newTemp->textID = textID;
+			newTemp->score = newScore;
+			newTemp->next = temp->next;
+			temp->next = newTemp;
 		}
 
 	}
@@ -779,5 +849,43 @@ void deleteScoreList(scoreList* ptr){
 	if(ptr == NULL)
 		return;
 	deleteScoreList(ptr->next);
+	free(ptr);
+}
+
+int addUnderlineList(underlineList** ptr, int column, int length){
+	
+	underlineList* temp;
+	underlineList* previous = NULL;
+
+	if(*ptr == NULL){
+		(*ptr) = (underlineList*)malloc(sizeof(underlineList));
+		if(*ptr == NULL)
+			return MEMORY_NOT_ALLOCATED;
+		(*ptr)->startColumn = column;
+		(*ptr)->wordLength = length;
+		(*ptr)->next = NULL;
+	}
+	else{
+		temp = *ptr;
+		while(temp != NULL){
+			previous = temp;
+			temp = temp->next;
+		}
+
+		temp = (underlineList*)malloc(sizeof(underlineList));
+		if(temp == NULL)
+			return MEMORY_NOT_ALLOCATED;
+		temp->startColumn = column;
+		temp->wordLength = length;
+		temp->next = NULL;
+		previous->next = temp;
+	}
+	return OK;
+}
+
+void deleteUnderlineList(underlineList* ptr){
+	if(ptr == NULL)
+		return;
+	deleteUnderlineList(ptr->next);
 	free(ptr);
 }

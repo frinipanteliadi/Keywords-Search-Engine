@@ -41,6 +41,12 @@ typedef struct scoreList{
 	struct scoreList* next;
 }scoreList;
 
+typedef struct underlineList{
+	int startColumn;
+	int wordLength;
+	struct underlineList* next;
+}underlineList;
+
 int compareKeys(char*, char*);
 int getNumberOfWords(char*);
 double averageNumberOfWords(int,int);
@@ -69,3 +75,5 @@ int dfOperation(trieNode*, char*, int, map*);
 int tfOperation(trieNode*, char*);
 int addScoreList(scoreList**, int, double);
 void deleteScoreList(scoreList*);
+int addUnderlineList(underlineList**, int, int);
+void deleteUnderlineList(underlineList*);
