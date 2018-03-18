@@ -1,10 +1,10 @@
 all: minisearch
 
-minisearch: test.o functions.o
-	gcc test.o functions.o -o minisearch -g -lm 
+minisearch: main.o functions.o
+	gcc main.o functions.o -o minisearch -g -lm 
 
-test.o: test.c
-	gcc -c test.c -g
+main.o: main.c
+	gcc -c main.c -g
 
 functions.o: functions.c
 	gcc -c functions.c -g

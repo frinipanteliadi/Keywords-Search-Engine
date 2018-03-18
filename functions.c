@@ -186,7 +186,6 @@ int insertTrie(trieNode* node, char* word,int textID){
 	/* Each iteration is responsible for a single
 	   letter of the word we're trying to insert */
 	for(int i = 0; i < strlen(word); i++){
-		// printf("Inserting the letter %c\n",word[i]);
 
 		if(temp->children == NULL){
 			temp->children = (trieNode*)malloc(sizeof(trieNode));
@@ -206,7 +205,6 @@ int insertTrie(trieNode* node, char* word,int textID){
 				errorCode = addList(&(temp->listPtr), textID, word);
 				if(errorCode != OK)
 					return errorCode;
-				// printPostingsList(temp->listPtr,word);
 			}
 		}
 
@@ -278,7 +276,6 @@ int insertTrie(trieNode* node, char* word,int textID){
 				errorCode = addList(&(temp->listPtr), textID, word);
 				if(errorCode != OK)
 					return errorCode;
-				// printPostingsList(temp->listPtr,word);
 			}
 			
 			previous = NULL;	
@@ -349,14 +346,11 @@ postingsList* searchTrie(trieNode* node,char* word){
 			return NULL;
 		
 
-		if(value < 0){
-			// printf("2)The word '%s' is not in the Trie\n",word);
+		if(value < 0)
 			return NULL;
-		}
-
+		
 		if(i == strlen(word)-1){
 			if(temp->isEndOfWord == True){
-				// printf("The word '%s' is in the Trie\n",word);
 				return temp->listPtr;
 			}
 			else
@@ -493,8 +487,6 @@ void printPostingsList(postingsList* ptr, char* word){
 void printAllDF(trieNode* node){
 	if(node == NULL)
 		return;
-	// printAllDF(node->next);
-	// printAllDF(node->children);
 	printAllDF(node->children);
 	printAllDF(node->next);
 	if(node->isEndOfWord == True)
@@ -584,7 +576,7 @@ int searchOperation(trieNode* node, char* arguments, int totalTexts, map* array,
 	underlineList* tempUnderline;
 
 	char* wordCopy;
-	int columnCounter;
+	int columnCounter;						/* Keeps track of the column we're at */
 
 	printf("\n");
   	for(int i = 1; i < k+1; i++){
@@ -755,6 +747,7 @@ int addScoreList(scoreList** ptr, int textID, double score){
 	double value;
 	double newScore = score;
 
+	/* The list is empty */
 	if(*ptr == NULL){
 		*ptr = (scoreList*)malloc(sizeof(scoreList));
 		if(*ptr == NULL)
@@ -830,7 +823,6 @@ int addScoreList(scoreList** ptr, int textID, double score){
 		}
 		else if(value == 0){
 			scoreList* newTemp;
-			//previous = temp;
 			newTemp = (scoreList*)malloc(sizeof(scoreList));
 			if(newTemp == NULL)
 				return MEMORY_NOT_ALLOCATED;

@@ -51,7 +51,6 @@ int main(int argc, char *argv[]){
 	/***********************************/
 	char* lineptr = NULL;
 	int lines = getNumberOfLines(fp);
-	// printf("The file has %d texts in total\n",lines);
 	rewind(fp);
 	free(lineptr);
 	
@@ -76,9 +75,6 @@ int main(int argc, char *argv[]){
 	}
 
 	double average = averageNumberOfWords(totalWords,lines);
-	// printf("Total words in the document: %d\n",totalWords);
-	// printf("Average number of words: %1.2f\n",average);
-	// printMap(lines,array); 
 
 	/************************/
 	/*** CLOSING THE FILE ***/
@@ -98,7 +94,6 @@ int main(int argc, char *argv[]){
 	}
 
 	initializeRoot(&root);
-	// printNodes(root);		
 
 	/*************************/
 	/*** CREATING THE TRIE ***/ 
@@ -110,10 +105,6 @@ int main(int argc, char *argv[]){
 		printError(code);
 		return EXIT;
 	}
-
-	// printMap(lines,array);
-	// printNodes(root);
-
 
 	/**********************/
 	/*** USER INTERFACE ***/
@@ -130,7 +121,6 @@ int main(int argc, char *argv[]){
 		char* arguments = strtok(NULL,"\n");		/* The arguments of the command */
 		
 		if(strcmp(operation,"/search") == 0){
-			// printf("You requested a search\n");
 			code = searchOperation(root,arguments,lines,array,average,k);
 			if(code != OK){
 				printError(code);
@@ -138,7 +128,6 @@ int main(int argc, char *argv[]){
 			}
 		}
 		else if(strcmp(operation,"/df") == 0){
-			// printf("You requested the document frequency vector\n");
 			code = dfOperation(root,arguments,lines,array);
 			if(code != OK){
 				printError(code);
@@ -146,7 +135,6 @@ int main(int argc, char *argv[]){
 			}
 		}
 		else if(strcmp(operation,"/tf") == 0){
-			// printf("You requested the term frequency of a word\n");
 			code = tfOperation(root,arguments);
 			if(code != OK){
 				printError(code);
