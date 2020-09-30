@@ -96,7 +96,11 @@ or
 /df q1
 ```
 
+![Document frequency vector (single word)](https://github.com/frinipanteliadi/Keywords-Search-Engine/blob/master/Images/Document%20frequency%20vector%20(single%20word).png)
 
+If the word doesn't appear in any of the given texts, we get the following:
+
+![Document frequency vector (no results)](https://github.com/frinipanteliadi/Keywords-Search-Engine/blob/master/Images/Document%20frequency%20vector%20(no%20results).png)
 
 ### Finding the term frequency of a word
 
