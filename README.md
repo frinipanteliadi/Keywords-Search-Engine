@@ -82,5 +82,23 @@ If no results are found, nothing will be displayed on screen:
 
 ### Finding the document frequency vector
 
+We can use the */df* operation to find the document frequency vector of either all words or a single word by typing
 
+```
+/df
+```
+
+![Document frequency vector](https://github.com/frinipanteliadi/Keywords-Search-Engine/blob/master/Images/Document%20frequency%20vector.png)
+
+or
+
+```
+/df q1
+```
+
+
+
+### Finding the term frequency of a word
+
+To find the term frequency of a word 
 
