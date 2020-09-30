@@ -76,3 +76,7 @@ The search results will look something like this:
 
 where the number enclosed in parentheses is the ID of the text and the number enclosed in square brackets is the relevance score.
 
+If no results are found, nothing will be displayed on screen:
+
+![No results](https://github.com/frinipanteliadi/Keywords-Search-Engine/blob/master/Images/No%20results.png)
+
