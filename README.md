@@ -124,6 +124,4 @@ To terminate the program we type:
 
 ![Exiting the program](https://github.com/frinipanteliadi/Keywords-Search-Engine/blob/master/Images/exit.png)
 
-
-
-We can also use `make clean` command to remove all of the object files and the executable that were created.
+(*) We can also use the `make clean` command to remove all of the object files and the executable that were created.
