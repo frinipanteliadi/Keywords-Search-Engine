@@ -73,3 +73,6 @@ Keep in mind that:
 The search results will look something like this:
 
 ![Search results](https://github.com/frinipanteliadi/Keywords-Search-Engine/blob/master/Images/Search%20results.png)
+
+where the number enclosed in parentheses is the ID of the text and the number enclosed in square brackets is the relevance score.
+
