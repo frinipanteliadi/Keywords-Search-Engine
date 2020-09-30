@@ -67,3 +67,9 @@ Keep in mind that:
 
 - at least one keyword must be given at all times,
 - if more than 10 keywords are given, only the first 10 will be searched for. 
+
+
+
+The search results will look something like this:
+
+![Search results](https://github.com/frinipanteliadi/Keywords-Search-Engine/blob/master/Images/Search%20results.png)
