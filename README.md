@@ -52,3 +52,18 @@ make
 where *docfile* is the name of the file that holds the texts we'll be using and *K* the number of the top results that we want to be displayed on the screen.
 
 We are then greeted by a message that informs us of the operations that the program is capable of.
+
+![Welcome screen](https://github.com/frinipanteliadi/Keywords-Search-Engine/blob/master/Images/Welcome%20screen.png)
+
+### Searching for keywords
+
+We can search for certain keywords in the provided texts by using the */search* operation. To do that we type:
+
+```
+/search q1 q2 q3 q4 ... q4
+```
+
+Keep in mind that:
+
+- at least one keyword must be given at all times,
+- if more than 10 keywords are given, only the first 10 will be searched for. 
