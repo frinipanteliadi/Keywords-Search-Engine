@@ -78,7 +78,7 @@ where the number enclosed in parentheses is the ID of the text and the number en
 
 If no results are found, nothing will be displayed on screen:
 
-![No results](https://github.com/frinipanteliadi/Keywords-Search-Engine/blob/master/Images/No%20results.png)
+
 
 ### Finding the document frequency vector
 
