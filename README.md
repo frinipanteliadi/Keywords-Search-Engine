@@ -104,5 +104,22 @@ If the word doesn't appear in any of the given texts, we get the following:
 
 ### Finding the term frequency of a word
 
-To find the term frequency of a word 
+To find the term frequency of a word in a certain text, we use the */tf* operation by typing:
 
+```
+/tf id word
+```
+
+where *id* refers to that certain text.
+
+![Term frequency](https://github.com/frinipanteliadi/Keywords-Search-Engine/blob/master/Images/Term%20frequency.png)
+
+### Exiting the program
+
+To terminate the program we type:
+
+```
+/exit
+```
+
+![Exiting the program](https://github.com/frinipanteliadi/Keywords-Search-Engine/blob/master/Images/exit.png)
