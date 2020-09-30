@@ -80,3 +80,7 @@ If no results are found, nothing will be displayed on screen:
 
 ![No results](https://github.com/frinipanteliadi/Keywords-Search-Engine/blob/master/Images/No%20results.png)
 
+### Finding the document frequency vector
+
+
+
